@@ -75,6 +75,14 @@ fun MainScreen(
         }
     }
 
+    LaunchedEffect(hasLocationPermission) {
+        if (hasLocationPermission) {
+            viewModel.startAllTracking()
+        } else {
+            viewModel.stopAllTracking()
+        }
+    }
+
     // Connect state variables
     val currentTheme by viewModel.currentTheme.collectAsState()
     val colorScheme = ThemeColors.getColorScheme(currentTheme)
@@ -173,8 +181,8 @@ fun MainScreen(
                 // Premium haptics: Tactile mechanical detent ticks for speed milestones (dynamic physical feedback)
                 var lastTickedSpeed by remember { mutableIntStateOf(0) }
                 val roundedSpeed = animatedSpeed.roundToInt()
-                LaunchedEffect(roundedSpeed) {
-                    if (currentSpeedMPS > 0.15f && roundedSpeed != lastTickedSpeed) {
+                LaunchedEffect(roundedSpeed, pagerState.currentPage) {
+                    if (pagerState.currentPage == 0 && currentSpeedMPS > 0.15f && roundedSpeed != lastTickedSpeed) {
                         viewModel.hapticEngine.playSpeedMilestoneTick()
                         lastTickedSpeed = roundedSpeed
                     }
@@ -183,8 +191,8 @@ fun MainScreen(
                 // Premium haptics: Altimeter physical ticks for altitude milestones
                 var lastTickedAltitude by remember { mutableIntStateOf(0) }
                 val roundedAltitude = animatedAltitude.roundToInt()
-                LaunchedEffect(roundedAltitude) {
-                    if (isBarometerAvailable && roundedAltitude != lastTickedAltitude) {
+                LaunchedEffect(roundedAltitude, pagerState.currentPage) {
+                    if (pagerState.currentPage == 1 && isBarometerAvailable && roundedAltitude != lastTickedAltitude) {
                         viewModel.hapticEngine.playSpeedMilestoneTick()
                         lastTickedAltitude = roundedAltitude
                     }
@@ -219,7 +227,7 @@ fun MainScreen(
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .pointerInput(Unit) {
+                                            .pointerInput(activeSpeedometerIndex) {
                                                 var dragAccumulator = 0f
                                                 var currentTempIndex = activeSpeedometerIndex
 
@@ -237,27 +245,21 @@ fun MainScreen(
                                                     },
                                                     onDrag = { _, dragAmount ->
                                                         dragAccumulator += dragAmount.x
-                                                        val threshold = 110f
+                                                        val threshold = 70f
                                                         if (dragAccumulator > threshold) {
                                                             currentTempIndex = (currentTempIndex - 1 + 20) % 20
                                                             viewModel.previewSpeedometerStyle(currentTempIndex)
+                                                            viewModel.hapticEngine.playSpeedStyleSlide()
                                                             dragAccumulator = 0f
                                                         } else if (dragAccumulator < -threshold) {
                                                             currentTempIndex = (currentTempIndex + 1) % 20
                                                             viewModel.previewSpeedometerStyle(currentTempIndex)
+                                                            viewModel.hapticEngine.playSpeedStyleSlide()
                                                             dragAccumulator = 0f
                                                         }
                                                     }
                                                 )
-                                            }
-                                            .combinedClickable(
-                                                onLongClick = {
-                                                    val nextUnitOrdinal = (speedUnit.ordinal + 1) % SpeedUnit.values().size
-                                                    viewModel.selectSpeedUnit(SpeedUnit.values()[nextUnitOrdinal])
-                                                    viewModel.hapticEngine.playThemeChangeSuccess()
-                                                },
-                                                onClick = {}
-                                            ),
+                                            },
                                         contentAlignment = Alignment.Center
                                     ) {
                                         SpeedometerDisplay(
@@ -296,7 +298,7 @@ fun MainScreen(
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .pointerInput(Unit) {
+                                            .pointerInput(activeAtmosphereIndex) {
                                                 var dragAccumulator = 0f
                                                 var currentTempIndex = activeAtmosphereIndex
 
@@ -314,27 +316,21 @@ fun MainScreen(
                                                     },
                                                     onDrag = { _, dragAmount ->
                                                         dragAccumulator += dragAmount.x
-                                                        val threshold = 110f
+                                                        val threshold = 70f
                                                         if (dragAccumulator > threshold) {
                                                             currentTempIndex = (currentTempIndex - 1 + 10) % 10
                                                             viewModel.previewAtmosphereStyle(currentTempIndex)
+                                                            viewModel.hapticEngine.playAtmosphereStyleSlide()
                                                             dragAccumulator = 0f
                                                         } else if (dragAccumulator < -threshold) {
                                                             currentTempIndex = (currentTempIndex + 1) % 10
                                                             viewModel.previewAtmosphereStyle(currentTempIndex)
+                                                            viewModel.hapticEngine.playAtmosphereStyleSlide()
                                                             dragAccumulator = 0f
                                                         }
                                                     }
                                                 )
-                                            }
-                                            .combinedClickable(
-                                                onLongClick = {
-                                                    val nextOrdinal = (altitudeUnit.ordinal + 1) % AltitudeUnit.values().size
-                                                    viewModel.selectAltitudeUnit(AltitudeUnit.values()[nextOrdinal])
-                                                    viewModel.hapticEngine.playThemeChangeSuccess()
-                                                },
-                                                onClick = {}
-                                            ),
+                                            },
                                         contentAlignment = Alignment.Center
                                     ) {
                                         if (!isBarometerAvailable) {
@@ -393,31 +389,30 @@ fun MainScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.SpaceBetween
                         ) {
-                            // 1. Simulation Source Control Capsule
+                            // 1. Direct Hardware GPS Telemetry Status Indicator
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(16.dp))
-                                    .background(if (isSimulating) uiAccent.copy(alpha = 0.08f) else uiText.copy(alpha = 0.04f))
+                                    .background(uiText.copy(alpha = 0.04f))
                                     .border(
                                         0.5.dp,
-                                        if (isSimulating) uiAccent.copy(alpha = 0.25f) else uiText.copy(alpha = 0.12f),
+                                        uiText.copy(alpha = 0.12f),
                                         RoundedCornerShape(16.dp)
                                     )
-                                    .clickable { viewModel.toggleSimulation(!isSimulating) }
                                     .padding(horizontal = 12.dp, vertical = 6.dp)
                             ) {
                                 Box(
                                     modifier = Modifier
                                         .size(6.dp)
-                                        .background(if (isSimulating) uiAccent else Color(0xFFFFCC00), CircleShape)
+                                        .background(Color(0xFFFFCC00), CircleShape)
                                 )
                                 Text(
-                                    text = if (isSimulating) "DRIVE SIM" else "REAL GPS",
+                                    text = "DIRECT GPS",
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isSimulating) uiAccent else uiText.copy(alpha = 0.7f),
+                                    color = uiText.copy(alpha = 0.7f),
                                     letterSpacing = 1.sp
                                 )
                             }
@@ -678,19 +673,18 @@ fun MainScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Interactive Simulation switch
+                            // High-Precision Direct Hardware GPS Status Indicator
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(16.dp))
-                                    .background(if (isSimulating) uiAccent.copy(alpha = 0.08f) else uiText.copy(alpha = 0.04f))
+                                    .background(uiText.copy(alpha = 0.04f))
                                     .border(
                                         0.5.dp,
-                                        if (isSimulating) uiAccent.copy(alpha = 0.25f) else uiText.copy(alpha = 0.12f),
+                                        uiText.copy(alpha = 0.12f),
                                         RoundedCornerShape(16.dp)
                                     )
-                                    .clickable { viewModel.toggleSimulation(!isSimulating) }
                                     .padding(horizontal = 12.dp, vertical = 6.dp)
                             ) {
                                 val infiniteTransition = rememberInfiniteTransition(label = "pulse")
@@ -707,22 +701,20 @@ fun MainScreen(
                                 Box(
                                     modifier = Modifier
                                         .size(8.dp)
-                                        .background(if (isSimulating) uiAccent else Color(0xFFFFCC00), CircleShape)
+                                        .background(Color(0xFFFFCC00), CircleShape)
                                         .drawBehind {
-                                            if (isSimulating) {
-                                                drawCircle(
-                                                    color = uiAccent.copy(alpha = pulseAlpha),
-                                                    radius = size.width * 1.5f
-                                                )
-                                            }
+                                            drawCircle(
+                                                color = Color(0xFFFFCC00).copy(alpha = pulseAlpha),
+                                                radius = size.width * 1.5f
+                                            )
                                         }
                                 )
                                 Text(
-                                    text = if (isSimulating) "DRIVE SIMULATOR" else "REAL SATELLITE GPS",
+                                    text = "HIGH-PRECISION HARDWARE GPS",
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = if (isSimulating) uiAccent else uiText.copy(alpha = 0.7f),
-                                    letterSpacing = 1.5.sp
+                                    color = uiText.copy(alpha = 0.7f),
+                                    letterSpacing = 1.2.sp
                                 )
                             }
 
@@ -766,7 +758,7 @@ fun MainScreen(
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .pointerInput(Unit) {
+                                            .pointerInput(activeSpeedometerIndex) {
                                                 var dragAccumulator = 0f
                                                 var currentTempIndex = activeSpeedometerIndex
 
@@ -784,27 +776,21 @@ fun MainScreen(
                                                     },
                                                     onDrag = { _, dragAmount ->
                                                         dragAccumulator += dragAmount.x
-                                                        val threshold = 110f
+                                                        val threshold = 70f
                                                         if (dragAccumulator > threshold) {
                                                             currentTempIndex = (currentTempIndex - 1 + 20) % 20
                                                             viewModel.previewSpeedometerStyle(currentTempIndex)
+                                                            viewModel.hapticEngine.playSpeedStyleSlide()
                                                             dragAccumulator = 0f
                                                         } else if (dragAccumulator < -threshold) {
                                                             currentTempIndex = (currentTempIndex + 1) % 20
                                                             viewModel.previewSpeedometerStyle(currentTempIndex)
+                                                            viewModel.hapticEngine.playSpeedStyleSlide()
                                                             dragAccumulator = 0f
                                                         }
                                                     }
                                                 )
-                                            }
-                                            .combinedClickable(
-                                                onLongClick = {
-                                                    val nextUnitOrdinal = (speedUnit.ordinal + 1) % SpeedUnit.values().size
-                                                    viewModel.selectSpeedUnit(SpeedUnit.values()[nextUnitOrdinal])
-                                                    viewModel.hapticEngine.playThemeChangeSuccess()
-                                                },
-                                                onClick = {}
-                                            ),
+                                            },
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Column(
@@ -836,36 +822,36 @@ fun MainScreen(
                                                     .clip(RoundedCornerShape(32.dp))
                                                     .border(0.5.dp, if (isSpeedUnitSliding) uiAccent else uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
                                                     .testTag("speed_unit_toggle")
-                                                    .pointerInput(Unit) {
+                                                    .pointerInput(speedUnit) {
                                                         detectDragGesturesAfterLongPress(
-                                                            onDragStart = {
-                                                                isSpeedUnitSliding = true
-                                                                speedUnitDragAccumulator = 0f
-                                                                viewModel.hapticEngine.doubleClick()
-                                                            },
-                                                            onDragEnd = {
-                                                                isSpeedUnitSliding = false
-                                                            },
-                                                            onDragCancel = {
-                                                                isSpeedUnitSliding = false
-                                                            },
-                                                            onDrag = { _, dragAmount ->
-                                                                speedUnitDragAccumulator += dragAmount.x
-                                                                val threshold = 70f
-                                                                if (speedUnitDragAccumulator > threshold) {
-                                                                    val values = SpeedUnit.values()
-                                                                    val nextIndex = (speedUnit.ordinal + 1) % values.size
-                                                                    viewModel.selectSpeedUnit(values[nextIndex])
-                                                                    viewModel.hapticEngine.playSpeedMilestoneTick()
-                                                                    speedUnitDragAccumulator = 0f
-                                                                } else if (speedUnitDragAccumulator < -threshold) {
-                                                                    val values = SpeedUnit.values()
-                                                                    val prevIndex = (speedUnit.ordinal - 1 + values.size) % values.size
-                                                                    viewModel.selectSpeedUnit(values[prevIndex])
-                                                                    viewModel.hapticEngine.playSpeedMilestoneTick()
-                                                                    speedUnitDragAccumulator = 0f
-                                                                }
-                                                            }
+                                                             onDragStart = {
+                                                                 isSpeedUnitSliding = true
+                                                                 speedUnitDragAccumulator = 0f
+                                                                 viewModel.hapticEngine.doubleClick()
+                                                             },
+                                                             onDragEnd = {
+                                                                 isSpeedUnitSliding = false
+                                                             },
+                                                             onDragCancel = {
+                                                                 isSpeedUnitSliding = false
+                                                             },
+                                                             onDrag = { _, dragAmount ->
+                                                                 speedUnitDragAccumulator += dragAmount.x
+                                                                 val threshold = 70f
+                                                                 if (speedUnitDragAccumulator > threshold) {
+                                                                     val values = SpeedUnit.values()
+                                                                     val nextIndex = (speedUnit.ordinal + 1) % values.size
+                                                                     viewModel.selectSpeedUnit(values[nextIndex])
+                                                                     viewModel.hapticEngine.playSpeedUnitSlide()
+                                                                     speedUnitDragAccumulator = 0f
+                                                                 } else if (speedUnitDragAccumulator < -threshold) {
+                                                                     val values = SpeedUnit.values()
+                                                                     val prevIndex = (speedUnit.ordinal - 1 + values.size) % values.size
+                                                                     viewModel.selectSpeedUnit(values[prevIndex])
+                                                                     viewModel.hapticEngine.playSpeedUnitSlide()
+                                                                     speedUnitDragAccumulator = 0f
+                                                                 }
+                                                             }
                                                         )
                                                     }
                                                     .clickable {
@@ -927,7 +913,7 @@ fun MainScreen(
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .pointerInput(Unit) {
+                                            .pointerInput(activeAtmosphereIndex) {
                                                 var dragAccumulator = 0f
                                                 var currentTempIndex = activeAtmosphereIndex
 
@@ -945,27 +931,21 @@ fun MainScreen(
                                                     },
                                                     onDrag = { _, dragAmount ->
                                                         dragAccumulator += dragAmount.x
-                                                        val threshold = 110f
+                                                        val threshold = 70f
                                                         if (dragAccumulator > threshold) {
                                                             currentTempIndex = (currentTempIndex - 1 + 10) % 10
                                                             viewModel.previewAtmosphereStyle(currentTempIndex)
+                                                            viewModel.hapticEngine.playAtmosphereStyleSlide()
                                                             dragAccumulator = 0f
                                                         } else if (dragAccumulator < -threshold) {
                                                             currentTempIndex = (currentTempIndex + 1) % 10
                                                             viewModel.previewAtmosphereStyle(currentTempIndex)
+                                                            viewModel.hapticEngine.playAtmosphereStyleSlide()
                                                             dragAccumulator = 0f
                                                         }
                                                     }
                                                 )
-                                            }
-                                            .combinedClickable(
-                                                onLongClick = {
-                                                    val nextOrdinal = (altitudeUnit.ordinal + 1) % AltitudeUnit.values().size
-                                                    viewModel.selectAltitudeUnit(AltitudeUnit.values()[nextOrdinal])
-                                                    viewModel.hapticEngine.playThemeChangeSuccess()
-                                                },
-                                                onClick = {}
-                                            ),
+                                            },
                                         contentAlignment = Alignment.Center
                                     ) {
                                         if (!isBarometerAvailable) {
@@ -1019,7 +999,7 @@ fun MainScreen(
                                                             .clip(RoundedCornerShape(32.dp))
                                                             .border(0.5.dp, if (isAltitudeSliding) uiAccent else uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
                                                             .testTag("altitude_unit_toggle")
-                                                            .pointerInput(Unit) {
+                                                            .pointerInput(altitudeUnit) {
                                                                 detectDragGesturesAfterLongPress(
                                                                     onDragStart = {
                                                                         isAltitudeSliding = true
@@ -1035,13 +1015,13 @@ fun MainScreen(
                                                                             val values = AltitudeUnit.values()
                                                                             val nextIndex = (altitudeUnit.ordinal + 1) % values.size
                                                                             viewModel.selectAltitudeUnit(values[nextIndex])
-                                                                            viewModel.hapticEngine.playSpeedMilestoneTick()
+                                                                            viewModel.hapticEngine.playAltitudeUnitSlide()
                                                                             altitudeDragAccumulator = 0f
                                                                         } else if (altitudeDragAccumulator < -threshold) {
                                                                             val values = AltitudeUnit.values()
                                                                             val prevIndex = (altitudeUnit.ordinal - 1 + values.size) % values.size
                                                                             viewModel.selectAltitudeUnit(values[prevIndex])
-                                                                            viewModel.hapticEngine.playSpeedMilestoneTick()
+                                                                            viewModel.hapticEngine.playAltitudeUnitSlide()
                                                                             altitudeDragAccumulator = 0f
                                                                         }
                                                                     }
@@ -1074,7 +1054,7 @@ fun MainScreen(
                                                             .clip(RoundedCornerShape(32.dp))
                                                             .border(0.5.dp, if (isPressureSliding) uiAccent else uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
                                                             .testTag("pressure_unit_toggle")
-                                                            .pointerInput(Unit) {
+                                                            .pointerInput(pressureUnit) {
                                                                 detectDragGesturesAfterLongPress(
                                                                     onDragStart = {
                                                                         isPressureSliding = true
@@ -1090,13 +1070,13 @@ fun MainScreen(
                                                                             val values = PressureUnit.values()
                                                                             val nextIndex = (pressureUnit.ordinal + 1) % values.size
                                                                             viewModel.selectPressureUnit(values[nextIndex])
-                                                                            viewModel.hapticEngine.playSpeedMilestoneTick()
+                                                                            viewModel.hapticEngine.playPressureUnitSlide()
                                                                             pressureDragAccumulator = 0f
                                                                         } else if (pressureDragAccumulator < -threshold) {
                                                                             val values = PressureUnit.values()
                                                                             val prevIndex = (pressureUnit.ordinal - 1 + values.size) % values.size
                                                                             viewModel.selectPressureUnit(values[prevIndex])
-                                                                            viewModel.hapticEngine.playSpeedMilestoneTick()
+                                                                            viewModel.hapticEngine.playPressureUnitSlide()
                                                                             pressureDragAccumulator = 0f
                                                                         }
                                                                     }

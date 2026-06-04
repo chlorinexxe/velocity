@@ -38,9 +38,9 @@ class SpeedTracker(private val context: Context) {
     // For manual speed estimation when hardware doesn't report location.getSpeed()
     private var lastLocation: Location? = null
     
-    // Exponential Moving Average (EMA) smoothing factor (0.35 = extremely high responsiveness, live physical feedback)
+    // Exponential Moving Average (EMA) smoothing factor - set to 1.0f for direct raw GPS pass-through (zero delay, maximum physical accuracy)
     private var smoothedSpeed = 0f
-    private val smoothingFactor = 0.35f
+    private val smoothingFactor = 1.0f
 
     init {
         try {
@@ -53,6 +53,20 @@ class SpeedTracker(private val context: Context) {
 
     @SuppressLint("MissingPermission")
     fun startTracking() {
+        val hasFine = androidx.core.content.ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.ACCESS_FINE_LOCATION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        val hasCoarse = androidx.core.content.ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+        if (!hasFine && !hasCoarse) {
+            Log.w("SpeedTracker", "Location permissions are not granted. Postponing hardware tracking initialization.")
+            return
+        }
+
         if (_isTracking.value) return
         _isTracking.value = true
         lastLocation = null
@@ -60,9 +74,9 @@ class SpeedTracker(private val context: Context) {
 
         // 1. Priming Fused Location Client
         try {
-            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 200)
-                .setMinUpdateIntervalMillis(100)
-                .setWaitForAccurateLocation(true)
+            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 100)
+                .setMinUpdateIntervalMillis(50)
+                .setWaitForAccurateLocation(false) // Instant telemetry updates without blocking delay!
                 .build()
 
             locationCallback = object : LocationCallback() {
@@ -80,12 +94,9 @@ class SpeedTracker(private val context: Context) {
             Log.d("SpeedTracker", "Fused Location updates started.")
         } catch (e: Exception) {
             Log.e("SpeedTracker", "Failed starting Fused Location services, falling back.", e)
-            startManualGpsFallback()
         }
-    }
 
-    @SuppressLint("MissingPermission")
-    private fun startManualGpsFallback() {
+        // 2. High-Precision Direct Hardware GPS Pipeline (Dual-Active tracking for maximum physical accuracy)
         try {
             fallbackListener = object : LocationListener {
                 override fun onLocationChanged(location: Location) {
@@ -99,14 +110,14 @@ class SpeedTracker(private val context: Context) {
 
             locationManager?.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
-                500L,
-                0f,
+                100L, // 10 Hz physical hardware telemetry
+                0f,   // 0 meters displacement filter for infinite flow
                 fallbackListener!!,
                 Looper.getMainLooper()
             )
-            Log.d("SpeedTracker", "Fallback LocationManager GPS updates started.")
+            Log.d("SpeedTracker", "Hardware GPS updates started concurrently.")
         } catch (e: Exception) {
-            Log.e("SpeedTracker", "Failed starting traditional GPS updates", e)
+            Log.e("SpeedTracker", "Failed starting direct hardware GPS updates", e)
         }
     }
 

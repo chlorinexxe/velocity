@@ -92,102 +92,30 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val isThemeSelectionActive: StateFlow<Boolean> = _isThemeSelectionActive.asStateFlow()
 
     init {
-        // Collect real speedTracker & atmosphereTracker flows
+        // Collect real speedTracker & atmosphereTracker flows directly with no checks or simulation overrides
         viewModelScope.launch {
             speedTracker.currentSpeedMPS.collect { realSpeed ->
-                if (!_isSimulating.value) {
-                    _currentSpeedMPS.value = realSpeed
-                }
+                _currentSpeedMPS.value = realSpeed
             }
         }
         viewModelScope.launch {
             speedTracker.gpsAccuracy.collect { accuracy ->
-                if (!_isSimulating.value) {
-                    _gpsAccuracy.value = accuracy
-                }
+                _gpsAccuracy.value = accuracy
             }
         }
         viewModelScope.launch {
             atmosphereTracker.pressureHPa.collect { pressure ->
-                if (!_isSimulating.value) {
-                    _rawPressureHPa.value = pressure
-                }
+                _rawPressureHPa.value = pressure
             }
         }
         viewModelScope.launch {
             atmosphereTracker.estimatedAltitudeMeters.collect { altitude ->
-                if (!_isSimulating.value) {
-                    _rawAltitudeMeters.value = altitude
-                }
+                _rawAltitudeMeters.value = altitude
             }
         }
         viewModelScope.launch {
             atmosphereTracker.verticalSpeedMPS.collect { vs ->
-                if (!_isSimulating.value) {
-                    _verticalSpeedMPS.value = vs
-                }
-            }
-        }
-
-        // Start premium active simulation loop
-        startSimulationLoop()
-
-        // Automatically begin tracking environment sensors & location speeds
-        startAllTracking()
-    }
-
-    private fun startSimulationLoop() {
-        viewModelScope.launch {
-            var time = 0.0
-            while (true) {
-                if (_isSimulating.value) {
-                    time += 0.05
-                    
-                    // Simulate dynamic physical drive with acceleration, cruising fluctuations, and breaking deceleration halts
-                    val baseSpeed = 16.0f + 14.0f * kotlin.math.sin(time * 0.04).toFloat()
-                    val microfluctuation = 1.2f * kotlin.math.cos(time * 0.35).toFloat() * kotlin.math.sin(time * 0.12).toFloat()
-                    
-                    val stopCycle = kotlin.math.sin(time * 0.015).toFloat()
-                    val speedScale = if (stopCycle < -0.85f) {
-                        val factor = (stopCycle + 1.0f) / 0.15f // decelerate to standstill
-                        factor.coerceIn(0f, 1f)
-                    } else {
-                        1f
-                    }
-                    
-                    val targetSpeedVal = ((baseSpeed + microfluctuation) * speedScale).coerceAtLeast(0f)
-                    _currentSpeedMPS.value = targetSpeedVal
-
-                    // Simulate corresponding atmospheric metrics drift (altimeter climbs/descents)
-                    val altitudeVal = 160f + 85f * kotlin.math.sin(time * 0.018).toFloat() + 4f * kotlin.math.cos(time * 0.11).toFloat()
-                    _rawAltitudeMeters.value = altitudeVal
-
-                    // Barometric pressure drops as altitude ascends (1 hPa per ~8.3m)
-                    val pressureVal = 1013.25f - (altitudeVal / 8.3f)
-                    _rawPressureHPa.value = pressureVal
-
-                    // Rate of Climb/Descent matches the derivative of the altitude wave
-                    val vsVal = 1.6f * kotlin.math.cos(time * 0.018).toFloat() - 0.5f * kotlin.math.sin(time * 0.11).toFloat()
-                    _verticalSpeedMPS.value = if (kotlin.math.abs(vsVal) < 0.06f) 0f else vsVal
-                }
-                kotlinx.coroutines.delay(50) // 20 Hz updates for high-fidelity dials
-            }
-        }
-    }
-
-    fun toggleSimulation(active: Boolean) {
-        if (_isSimulating.value != active) {
-            _isSimulating.value = active
-            hapticEngine.playUnitSelection()
-            if (!active) {
-                // Return to actual live hardware metrics immediately
-                _currentSpeedMPS.value = speedTracker.currentSpeedMPS.value
-                _gpsAccuracy.value = speedTracker.gpsAccuracy.value
-                _rawPressureHPa.value = atmosphereTracker.pressureHPa.value
-                _rawAltitudeMeters.value = atmosphereTracker.estimatedAltitudeMeters.value
-                _verticalSpeedMPS.value = atmosphereTracker.verticalSpeedMPS.value
-            } else {
-                _gpsAccuracy.value = 0.8f
+                _verticalSpeedMPS.value = vs
             }
         }
     }

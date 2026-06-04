@@ -97,6 +97,76 @@ class HapticEngine(context: Context) {
     }
 
     /**
+     * Specialized distinct tick for speed unit sliding.
+     */
+    fun playSpeedUnitSlide() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            playComposition(
+                listOf(VibrationEffect.Composition.PRIMITIVE_LOW_TICK to 0.6f),
+                fallback = { tick() }
+            )
+        } else {
+            tick()
+        }
+    }
+
+    /**
+     * Specialized distinct tick for altitude unit sliding.
+     */
+    fun playAltitudeUnitSlide() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            playComposition(
+                listOf(VibrationEffect.Composition.PRIMITIVE_TICK to 0.7f),
+                fallback = { tick() }
+            )
+        } else {
+            tick()
+        }
+    }
+
+    /**
+     * Specialized distinct tick for pressure unit sliding.
+     */
+    fun playPressureUnitSlide() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            playComposition(
+                listOf(VibrationEffect.Composition.PRIMITIVE_CLICK to 0.4f),
+                fallback = { click() }
+            )
+        } else {
+            click()
+        }
+    }
+
+    /**
+     * Specialized tick for sliding and selecting speedometer styles.
+     */
+    fun playSpeedStyleSlide() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            playComposition(
+                listOf(VibrationEffect.Composition.PRIMITIVE_LOW_TICK to 0.75f),
+                fallback = { tick() }
+            )
+        } else {
+            tick()
+        }
+    }
+
+    /**
+     * Specialized tick for sliding and selecting atmospheric styles.
+     */
+    fun playAtmosphereStyleSlide() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            playComposition(
+                listOf(VibrationEffect.Composition.PRIMITIVE_TICK to 0.6f),
+                fallback = { tick() }
+            )
+        } else {
+            tick()
+        }
+    }
+
+    /**
      * Selection of a new unit configuration - double micro detent.
      */
     fun playUnitSelection() {
