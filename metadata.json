@@ -1,0 +1,6 @@
+{
+  "name": "Velocity",
+  "description": "Velocity - A high-fidelity minimalist real-time speed and atmospheric visualizer engine designed for sensory fluidity.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
