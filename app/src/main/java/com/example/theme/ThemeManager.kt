@@ -75,7 +75,7 @@ object ThemeColors {
                 onPrimary = SophisticatedDarkBg,
                 onSecondary = SophisticatedDarkPrimary,
                 onBackground = SophisticatedDarkOnBg,
-                onSurface = SophisticatedDarkSurface
+                onSurface = SophisticatedDarkOnBg
             )
             AppTheme.LIGHT -> lightColorScheme(
                 primary = LightPrimary,

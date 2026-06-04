@@ -46,6 +46,119 @@ class HapticEngine(context: Context) {
     }
 
     /**
+     * Custom composition helper using API 30+ primitives with graceful legacy fallback.
+     */
+    private fun playComposition(primitives: List<Pair<Int, Float>>, fallback: () -> Unit) {
+        if (vibrator == null || !vibrator.hasVibrator()) return
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val composition = VibrationEffect.startComposition()
+                for (prim in primitives) {
+                    val primitiveId = prim.first
+                    val scale = prim.second.coerceIn(0f, 1f)
+                    composition.addPrimitive(primitiveId, scale)
+                }
+                vibrator.vibrate(composition.compose())
+            } else {
+                fallback()
+            }
+        } catch (e: Exception) {
+            Log.e("HapticEngine", "Composition vibration failed", e)
+            fallback()
+        }
+    }
+
+    /**
+     * Premium Swipe transition vibration - ultra low-amplitude micro tick.
+     */
+    fun playPageSwipe() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            playComposition(
+                listOf(VibrationEffect.Composition.PRIMITIVE_LOW_TICK to 0.45f),
+                fallback = { tick() }
+            )
+        } else {
+            tick()
+        }
+    }
+
+    /**
+     * Speed milestone change tick - tactile mechanical detent simulation.
+     */
+    fun playSpeedMilestoneTick() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            playComposition(
+                listOf(VibrationEffect.Composition.PRIMITIVE_TICK to 0.35f),
+                fallback = { tick() }
+            )
+        } else {
+            tick()
+        }
+    }
+
+    /**
+     * Selection of a new unit configuration - double micro detent.
+     */
+    fun playUnitSelection() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            playComposition(
+                listOf(
+                    VibrationEffect.Composition.PRIMITIVE_LOW_TICK to 0.5f,
+                    VibrationEffect.Composition.PRIMITIVE_TICK to 0.7f
+                ),
+                fallback = { doubleClick() }
+            )
+        } else {
+            doubleClick()
+        }
+    }
+
+    /**
+     * Transition when opening a full drawer panel - swelling/rising haptic.
+     */
+    fun playPanelOpen() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            playComposition(
+                listOf(VibrationEffect.Composition.PRIMITIVE_QUICK_RISE to 0.65f),
+                fallback = { doubleClick() }
+            )
+        } else {
+            doubleClick()
+        }
+    }
+
+    /**
+     * Transition when closing a drawer panel - falling haptic.
+     */
+    fun playPanelClose() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            playComposition(
+                listOf(VibrationEffect.Composition.PRIMITIVE_QUICK_FALL to 0.5f),
+                fallback = { click() }
+            )
+        } else {
+            click()
+        }
+    }
+
+    /**
+     * Theme shift transition - premium cascading double pulse.
+     */
+    fun playThemeChangeSuccess() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            playComposition(
+                listOf(
+                    VibrationEffect.Composition.PRIMITIVE_TICK to 0.4f,
+                    VibrationEffect.Composition.PRIMITIVE_CLICK to 0.95f
+                ),
+                fallback = { heavyClick() }
+            )
+        } else {
+            heavyClick()
+        }
+    }
+
+    /**
      * Tactile pulse - custom wave pulse
      */
     fun slidePulse() {
@@ -84,3 +197,4 @@ class HapticEngine(context: Context) {
         }
     }
 }
+
