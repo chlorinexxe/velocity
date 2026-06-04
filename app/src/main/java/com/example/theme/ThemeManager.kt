@@ -12,7 +12,10 @@ enum class AppTheme(val displayName: String) {
     OLED("OLED Pure"),
     TITANIUM("Raw Titanium"),
     SAND("Sahara Sand"),
-    SLATE("Arctic Slate")
+    SLATE("Arctic Slate"),
+    CYBERPUNK("Cyberpunk Neon"),
+    RACING_GREEN("Racing Green"),
+    VOLCANIC_RED("Volcanic Lava")
 }
 
 object ThemeColors {
@@ -64,6 +67,27 @@ object ThemeColors {
     val SophisticatedDarkPrimary = Color(0xFFFFFFFF)
     val SophisticatedDarkOnBg = Color(0xFFFFFFFF)
     val SophisticatedDarkAccent = Color(0xFF10B981) // Emerald accent for dynamic details
+
+    // 8. Cyberpunk Neon (Electric purple & neon magenta)
+    val CyberpunkBg = Color(0xFF0E0B25)
+    val CyberpunkSurface = Color(0xFF161238)
+    val CyberpunkPrimary = Color(0xFF00FFFF) // Cyan
+    val CyberpunkOnBg = Color(0xFFFFFFFF)
+    val CyberpunkAccent = Color(0xFFFF007F) // Neon Pink
+
+    // 9. Racing Green (Deep track green & golden yellow details)
+    val RacingGreenBg = Color(0xFF091611)
+    val RacingGreenSurface = Color(0xFF11261E)
+    val RacingGreenPrimary = Color(0xFFE5FFFA)
+    val RacingGreenOnBg = Color(0xFFF0FFF5)
+    val RacingGreenAccent = Color(0xFFFFD700) // Gold
+
+    // 10. Volcanic Lava (Obsidian dark & melting molten magma glow)
+    val VolcanicBg = Color(0xFF140F0F)
+    val VolcanicSurface = Color(0xFF221616)
+    val VolcanicPrimary = Color(0xFFFFFAFA)
+    val VolcanicOnBg = Color(0xFFFFFFFE)
+    val VolcanicAccent = Color(0xFFFF3B30) // Lava Red
 
     fun getColorScheme(theme: AppTheme): ColorScheme {
         return when (theme) {
@@ -136,6 +160,36 @@ object ThemeColors {
                 onSecondary = SlatePrimary,
                 onBackground = SlateOnBg,
                 onSurface = SlateOnBg
+            )
+            AppTheme.CYBERPUNK -> darkColorScheme(
+                primary = CyberpunkPrimary,
+                secondary = CyberpunkAccent,
+                background = CyberpunkBg,
+                surface = CyberpunkSurface,
+                onPrimary = CyberpunkBg,
+                onSecondary = CyberpunkPrimary,
+                onBackground = CyberpunkOnBg,
+                onSurface = CyberpunkOnBg
+            )
+            AppTheme.RACING_GREEN -> darkColorScheme(
+                primary = RacingGreenPrimary,
+                secondary = RacingGreenAccent,
+                background = RacingGreenBg,
+                surface = RacingGreenSurface,
+                onPrimary = RacingGreenBg,
+                onSecondary = RacingGreenPrimary,
+                onBackground = RacingGreenOnBg,
+                onSurface = RacingGreenOnBg
+            )
+            AppTheme.VOLCANIC_RED -> darkColorScheme(
+                primary = VolcanicPrimary,
+                secondary = VolcanicAccent,
+                background = VolcanicBg,
+                surface = VolcanicSurface,
+                onPrimary = VolcanicBg,
+                onSecondary = VolcanicPrimary,
+                onBackground = VolcanicOnBg,
+                onSurface = VolcanicOnBg
             )
         }
     }

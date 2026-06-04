@@ -40,8 +40,8 @@ class AtmosphereTracker(context: Context) : SensorEventListener {
     // Filters to reduce sensory noise and jitter
     private var smoothedPressure = 1013.25f
     private var smoothedVerticalSpeed = 0f
-    private val pressureSmoothing = 0.08f // high smoothing for extreme stability
-    private val verticalSpeedSmoothing = 0.05f
+    private val pressureSmoothing = 0.28f // Increased frequency and reduced smoothing delay for instantaneous feedback
+    private val verticalSpeedSmoothing = 0.15f
 
     fun startTracking() {
         if (_isTracking.value || barometerSensor == null) return
@@ -51,7 +51,7 @@ class AtmosphereTracker(context: Context) : SensorEventListener {
         sensorManager?.registerListener(
             this,
             barometerSensor,
-            SensorManager.SENSOR_DELAY_UI // delay suited for smooth UI updates
+            SensorManager.SENSOR_DELAY_FASTEST // Absolute highest frequency for real-time responsiveness
         )
     }
 

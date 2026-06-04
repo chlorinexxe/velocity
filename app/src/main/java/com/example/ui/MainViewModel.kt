@@ -39,7 +39,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val hapticEngine = HapticEngine(application)
 
     // Simulation Engine Controls
-    private val _isSimulating = MutableStateFlow(true)
+    private val _isSimulating = MutableStateFlow(false)
     val isSimulating: StateFlow<Boolean> = _isSimulating.asStateFlow()
 
     private val _currentSpeedMPS = MutableStateFlow(0f)

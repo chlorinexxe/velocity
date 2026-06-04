@@ -428,30 +428,55 @@ fun MainScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (pagerState.currentPage == 0) {
+                                    var isSpeedLandSliding by remember { mutableStateOf(false) }
+                                    var speedLandDragAccumulator by remember { mutableStateOf(0f) }
+
                                     Surface(
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(32.dp))
-                                            .border(0.5.dp, uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
+                                            .border(0.5.dp, if (isSpeedLandSliding) uiAccent else uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
                                             .testTag("speed_unit_toggle_landscape")
-                                            .combinedClickable(
-                                                onClick = {
-                                                    val nextUnitOrdinal = (speedUnit.ordinal + 1) % SpeedUnit.values().size
-                                                    viewModel.selectSpeedUnit(SpeedUnit.values()[nextUnitOrdinal])
-                                                },
-                                                onLongClick = {
-                                                    val nextUnitOrdinal = (speedUnit.ordinal + 1) % SpeedUnit.values().size
-                                                    viewModel.selectSpeedUnit(SpeedUnit.values()[nextUnitOrdinal])
-                                                    viewModel.hapticEngine.playUnitSelection()
-                                                }
-                                            ),
-                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.25f)
+                                            .pointerInput(Unit) {
+                                                detectDragGesturesAfterLongPress(
+                                                    onDragStart = {
+                                                        isSpeedLandSliding = true
+                                                        speedLandDragAccumulator = 0f
+                                                        viewModel.hapticEngine.doubleClick()
+                                                    },
+                                                    onDragEnd = { isSpeedLandSliding = false },
+                                                    onDragCancel = { isSpeedLandSliding = false },
+                                                    onDrag = { _, dragAmount ->
+                                                        speedLandDragAccumulator += dragAmount.x
+                                                        val threshold = 70f
+                                                        if (speedLandDragAccumulator > threshold) {
+                                                            val values = SpeedUnit.values()
+                                                            val nextIdx = (speedUnit.ordinal + 1) % values.size
+                                                            viewModel.selectSpeedUnit(values[nextIdx])
+                                                            viewModel.hapticEngine.playSpeedMilestoneTick()
+                                                            speedLandDragAccumulator = 0f
+                                                        } else if (speedLandDragAccumulator < -threshold) {
+                                                            val values = SpeedUnit.values()
+                                                            val prevIdx = (speedUnit.ordinal - 1 + values.size) % values.size
+                                                            viewModel.selectSpeedUnit(values[prevIdx])
+                                                            viewModel.hapticEngine.playSpeedMilestoneTick()
+                                                            speedLandDragAccumulator = 0f
+                                                        }
+                                                    }
+                                                )
+                                            }
+                                            .clickable {
+                                                val nextUnitOrdinal = (speedUnit.ordinal + 1) % SpeedUnit.values().size
+                                                viewModel.selectSpeedUnit(SpeedUnit.values()[nextUnitOrdinal])
+                                                viewModel.hapticEngine.click()
+                                            },
+                                        color = MaterialTheme.colorScheme.surface.copy(alpha = if (isSpeedLandSliding) 0.45f else 0.25f)
                                     ) {
                                         Row(
                                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Text(
-                                                text = speedUnit.name,
+                                                text = if (isSpeedLandSliding) "UNIT: ${speedUnit.name}" else speedUnit.name,
                                                 fontSize = 11.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = uiAccent,
@@ -459,10 +484,10 @@ fun MainScreen(
                                             )
                                             Spacer(modifier = Modifier.width(6.dp))
                                             Text(
-                                                text = "• HOLD STYLE",
+                                                text = if (isSpeedLandSliding) "◀ SLIDE ▶" else "• HOLD & SLIDE",
                                                 fontSize = 9.sp,
                                                 fontWeight = FontWeight.Medium,
-                                                color = uiText.copy(alpha = 0.25f)
+                                                color = if (isSpeedLandSliding) uiAccent else uiText.copy(alpha = 0.25f)
                                             )
                                         }
                                     }
@@ -471,26 +496,51 @@ fun MainScreen(
                                         horizontalArrangement = Arrangement.Center,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
+                                        var isAltitudeLandSliding by remember { mutableStateOf(false) }
+                                        var altitudeLandDragAccumulator by remember { mutableStateOf(0f) }
+
                                         Surface(
                                             modifier = Modifier
                                                 .clip(RoundedCornerShape(32.dp))
-                                                .border(0.5.dp, uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
+                                                .border(0.5.dp, if (isAltitudeLandSliding) uiAccent else uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
                                                 .testTag("altitude_unit_toggle_landscape")
-                                                .combinedClickable(
-                                                    onClick = {
-                                                        val nextOrdinal = (altitudeUnit.ordinal + 1) % AltitudeUnit.values().size
-                                                        viewModel.selectAltitudeUnit(AltitudeUnit.values()[nextOrdinal])
-                                                    },
-                                                    onLongClick = {
-                                                        val nextOrdinal = (altitudeUnit.ordinal + 1) % AltitudeUnit.values().size
-                                                        viewModel.selectAltitudeUnit(AltitudeUnit.values()[nextOrdinal])
-                                                        viewModel.hapticEngine.playUnitSelection()
-                                                    }
-                                                ),
-                                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.25f),
+                                                .pointerInput(Unit) {
+                                                    detectDragGesturesAfterLongPress(
+                                                        onDragStart = {
+                                                            isAltitudeLandSliding = true
+                                                            altitudeLandDragAccumulator = 0f
+                                                            viewModel.hapticEngine.doubleClick()
+                                                        },
+                                                        onDragEnd = { isAltitudeLandSliding = false },
+                                                        onDragCancel = { isAltitudeLandSliding = false },
+                                                        onDrag = { _, dragAmount ->
+                                                            altitudeLandDragAccumulator += dragAmount.x
+                                                            val threshold = 70f
+                                                            if (altitudeLandDragAccumulator > threshold) {
+                                                                val values = AltitudeUnit.values()
+                                                                val nextIdx = (altitudeUnit.ordinal + 1) % values.size
+                                                                viewModel.selectAltitudeUnit(values[nextIdx])
+                                                                viewModel.hapticEngine.playSpeedMilestoneTick()
+                                                                altitudeLandDragAccumulator = 0f
+                                                            } else if (altitudeLandDragAccumulator < -threshold) {
+                                                                val values = AltitudeUnit.values()
+                                                                val prevIdx = (altitudeUnit.ordinal - 1 + values.size) % values.size
+                                                                viewModel.selectAltitudeUnit(values[prevIdx])
+                                                                viewModel.hapticEngine.playSpeedMilestoneTick()
+                                                                altitudeLandDragAccumulator = 0f
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                                .clickable {
+                                                    val nextOrdinal = (altitudeUnit.ordinal + 1) % AltitudeUnit.values().size
+                                                    viewModel.selectAltitudeUnit(AltitudeUnit.values()[nextOrdinal])
+                                                    viewModel.hapticEngine.click()
+                                                },
+                                            color = MaterialTheme.colorScheme.surface.copy(alpha = if (isAltitudeLandSliding) 0.45f else 0.25f),
                                         ) {
                                             Text(
-                                                text = altitudeUnit.label.uppercase(),
+                                                text = if (isAltitudeLandSliding) "ALT: ${altitudeUnit.label.uppercase()}" else altitudeUnit.label.uppercase(),
                                                 fontSize = 10.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = uiAccent,
@@ -501,26 +551,51 @@ fun MainScreen(
 
                                         Spacer(modifier = Modifier.width(8.dp))
 
+                                        var isPressureLandSliding by remember { mutableStateOf(false) }
+                                        var pressureLandDragAccumulator by remember { mutableStateOf(0f) }
+
                                         Surface(
                                             modifier = Modifier
                                                 .clip(RoundedCornerShape(32.dp))
-                                                .border(0.5.dp, uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
+                                                .border(0.5.dp, if (isPressureLandSliding) uiAccent else uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
                                                 .testTag("pressure_unit_toggle_landscape")
-                                                .combinedClickable(
-                                                    onClick = {
-                                                        val nextOrdinal = (pressureUnit.ordinal + 1) % PressureUnit.values().size
-                                                        viewModel.selectPressureUnit(PressureUnit.values()[nextOrdinal])
-                                                    },
-                                                    onLongClick = {
-                                                        val nextOrdinal = (pressureUnit.ordinal + 1) % PressureUnit.values().size
-                                                        viewModel.selectPressureUnit(PressureUnit.values()[nextOrdinal])
-                                                        viewModel.hapticEngine.playUnitSelection()
-                                                    }
-                                                ),
-                                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.25f),
+                                                .pointerInput(Unit) {
+                                                    detectDragGesturesAfterLongPress(
+                                                        onDragStart = {
+                                                            isPressureLandSliding = true
+                                                            pressureLandDragAccumulator = 0f
+                                                            viewModel.hapticEngine.doubleClick()
+                                                        },
+                                                        onDragEnd = { isPressureLandSliding = false },
+                                                        onDragCancel = { isPressureLandSliding = false },
+                                                        onDrag = { _, dragAmount ->
+                                                            pressureLandDragAccumulator += dragAmount.x
+                                                            val threshold = 70f
+                                                            if (pressureLandDragAccumulator > threshold) {
+                                                                val values = PressureUnit.values()
+                                                                val nextIdx = (pressureUnit.ordinal + 1) % values.size
+                                                                viewModel.selectPressureUnit(values[nextIdx])
+                                                                viewModel.hapticEngine.playSpeedMilestoneTick()
+                                                                pressureLandDragAccumulator = 0f
+                                                            } else if (pressureLandDragAccumulator < -threshold) {
+                                                                val values = PressureUnit.values()
+                                                                val prevIdx = (pressureUnit.ordinal - 1 + values.size) % values.size
+                                                                viewModel.selectPressureUnit(values[prevIdx])
+                                                                viewModel.hapticEngine.playSpeedMilestoneTick()
+                                                                pressureLandDragAccumulator = 0f
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                                .clickable {
+                                                    val nextOrdinal = (pressureUnit.ordinal + 1) % PressureUnit.values().size
+                                                    viewModel.selectPressureUnit(PressureUnit.values()[nextOrdinal])
+                                                    viewModel.hapticEngine.click()
+                                                },
+                                            color = MaterialTheme.colorScheme.surface.copy(alpha = if (isPressureLandSliding) 0.45f else 0.25f),
                                         ) {
                                             Text(
-                                                text = pressureUnit.label.uppercase(),
+                                                text = if (isPressureLandSliding) "BARO: ${pressureUnit.label.uppercase()}" else pressureUnit.label.uppercase(),
                                                 fontSize = 10.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = uiAccent,
@@ -751,32 +826,61 @@ fun MainScreen(
                                                 )
                                             }
 
-                                            // Interactive metrics indicator badge (supports click & long click)
+                                            var isSpeedUnitSliding by remember { mutableStateOf(false) }
+                                            var speedUnitDragAccumulator by remember { mutableStateOf(0f) }
+
+                                            // Interactive metrics indicator badge (supports slide & click)
                                             Surface(
                                                 modifier = Modifier
                                                     .padding(bottom = 24.dp)
                                                     .clip(RoundedCornerShape(32.dp))
-                                                    .border(0.5.dp, uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
+                                                    .border(0.5.dp, if (isSpeedUnitSliding) uiAccent else uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
                                                     .testTag("speed_unit_toggle")
-                                                    .combinedClickable(
-                                                        onClick = {
-                                                            val nextUnitOrdinal = (speedUnit.ordinal + 1) % SpeedUnit.values().size
-                                                            viewModel.selectSpeedUnit(SpeedUnit.values()[nextUnitOrdinal])
-                                                        },
-                                                        onLongClick = {
-                                                            val nextUnitOrdinal = (speedUnit.ordinal + 1) % SpeedUnit.values().size
-                                                            viewModel.selectSpeedUnit(SpeedUnit.values()[nextUnitOrdinal])
-                                                            viewModel.hapticEngine.playUnitSelection()
-                                                        }
-                                                    ),
-                                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.25f)
+                                                    .pointerInput(Unit) {
+                                                        detectDragGesturesAfterLongPress(
+                                                            onDragStart = {
+                                                                isSpeedUnitSliding = true
+                                                                speedUnitDragAccumulator = 0f
+                                                                viewModel.hapticEngine.doubleClick()
+                                                            },
+                                                            onDragEnd = {
+                                                                isSpeedUnitSliding = false
+                                                            },
+                                                            onDragCancel = {
+                                                                isSpeedUnitSliding = false
+                                                            },
+                                                            onDrag = { _, dragAmount ->
+                                                                speedUnitDragAccumulator += dragAmount.x
+                                                                val threshold = 70f
+                                                                if (speedUnitDragAccumulator > threshold) {
+                                                                    val values = SpeedUnit.values()
+                                                                    val nextIndex = (speedUnit.ordinal + 1) % values.size
+                                                                    viewModel.selectSpeedUnit(values[nextIndex])
+                                                                    viewModel.hapticEngine.playSpeedMilestoneTick()
+                                                                    speedUnitDragAccumulator = 0f
+                                                                } else if (speedUnitDragAccumulator < -threshold) {
+                                                                    val values = SpeedUnit.values()
+                                                                    val prevIndex = (speedUnit.ordinal - 1 + values.size) % values.size
+                                                                    viewModel.selectSpeedUnit(values[prevIndex])
+                                                                    viewModel.hapticEngine.playSpeedMilestoneTick()
+                                                                    speedUnitDragAccumulator = 0f
+                                                                }
+                                                            }
+                                                        )
+                                                    }
+                                                    .clickable {
+                                                        val nextUnitOrdinal = (speedUnit.ordinal + 1) % SpeedUnit.values().size
+                                                        viewModel.selectSpeedUnit(SpeedUnit.values()[nextUnitOrdinal])
+                                                        viewModel.hapticEngine.click()
+                                                    },
+                                                color = MaterialTheme.colorScheme.surface.copy(alpha = if (isSpeedUnitSliding) 0.45f else 0.25f)
                                             ) {
                                                 Row(
                                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                                                     verticalAlignment = Alignment.CenterVertically
                                                 ) {
                                                     Text(
-                                                        text = speedUnit.label.uppercase(),
+                                                        text = if (isSpeedUnitSliding) "UNIT: ${speedUnit.label.uppercase()}" else speedUnit.label.uppercase(),
                                                         fontSize = 11.sp,
                                                         fontWeight = FontWeight.Bold,
                                                         color = uiAccent,
@@ -784,10 +888,10 @@ fun MainScreen(
                                                     )
                                                     Spacer(modifier = Modifier.width(6.dp))
                                                     Text(
-                                                        text = "• HOLD METRIC",
+                                                        text = if (isSpeedUnitSliding) "◀ SLIDE ▶" else "• HOLD & SLIDE",
                                                         fontSize = 10.sp,
                                                         fontWeight = FontWeight.Medium,
-                                                        color = uiText.copy(alpha = 0.2f),
+                                                        color = if (isSpeedUnitSliding) uiAccent else uiText.copy(alpha = 0.2f),
                                                         letterSpacing = 1.sp
                                                     )
                                                 }
@@ -900,33 +1004,58 @@ fun MainScreen(
                                                         textColor = uiText
                                                     )
                                                 }
-
-                                                // Double interactive metric badges (supports tap & long clicks)
+ 
+                                                // Double interactive metric badges (supports tap & horizontal slide gestures)
                                                 Row(
                                                     modifier = Modifier.padding(bottom = 24.dp),
                                                     horizontalArrangement = Arrangement.Center,
                                                     verticalAlignment = Alignment.CenterVertically
                                                 ) {
+                                                    var isAltitudeSliding by remember { mutableStateOf(false) }
+                                                    var altitudeDragAccumulator by remember { mutableStateOf(0f) }
+
                                                     Surface(
                                                         modifier = Modifier
                                                             .clip(RoundedCornerShape(32.dp))
-                                                            .border(0.5.dp, uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
+                                                            .border(0.5.dp, if (isAltitudeSliding) uiAccent else uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
                                                             .testTag("altitude_unit_toggle")
-                                                            .combinedClickable(
-                                                                onClick = {
-                                                                    val nextOrdinal = (altitudeUnit.ordinal + 1) % AltitudeUnit.values().size
-                                                                    viewModel.selectAltitudeUnit(AltitudeUnit.values()[nextOrdinal])
-                                                                },
-                                                                onLongClick = {
-                                                                    val nextOrdinal = (altitudeUnit.ordinal + 1) % AltitudeUnit.values().size
-                                                                    viewModel.selectAltitudeUnit(AltitudeUnit.values()[nextOrdinal])
-                                                                    viewModel.hapticEngine.playUnitSelection()
-                                                                }
-                                                            ),
-                                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.25f),
+                                                            .pointerInput(Unit) {
+                                                                detectDragGesturesAfterLongPress(
+                                                                    onDragStart = {
+                                                                        isAltitudeSliding = true
+                                                                        altitudeDragAccumulator = 0f
+                                                                        viewModel.hapticEngine.doubleClick()
+                                                                    },
+                                                                    onDragEnd = { isAltitudeSliding = false },
+                                                                    onDragCancel = { isAltitudeSliding = false },
+                                                                    onDrag = { _, dragAmount ->
+                                                                        altitudeDragAccumulator += dragAmount.x
+                                                                        val threshold = 70f
+                                                                        if (altitudeDragAccumulator > threshold) {
+                                                                            val values = AltitudeUnit.values()
+                                                                            val nextIndex = (altitudeUnit.ordinal + 1) % values.size
+                                                                            viewModel.selectAltitudeUnit(values[nextIndex])
+                                                                            viewModel.hapticEngine.playSpeedMilestoneTick()
+                                                                            altitudeDragAccumulator = 0f
+                                                                        } else if (altitudeDragAccumulator < -threshold) {
+                                                                            val values = AltitudeUnit.values()
+                                                                            val prevIndex = (altitudeUnit.ordinal - 1 + values.size) % values.size
+                                                                            viewModel.selectAltitudeUnit(values[prevIndex])
+                                                                            viewModel.hapticEngine.playSpeedMilestoneTick()
+                                                                            altitudeDragAccumulator = 0f
+                                                                        }
+                                                                    }
+                                                                )
+                                                            }
+                                                            .clickable {
+                                                                val nextOrdinal = (altitudeUnit.ordinal + 1) % AltitudeUnit.values().size
+                                                                viewModel.selectAltitudeUnit(AltitudeUnit.values()[nextOrdinal])
+                                                                viewModel.hapticEngine.click()
+                                                            },
+                                                        color = MaterialTheme.colorScheme.surface.copy(alpha = if (isAltitudeSliding) 0.45f else 0.25f),
                                                     ) {
                                                         Text(
-                                                            text = altitudeUnit.label.uppercase(),
+                                                            text = if (isAltitudeSliding) "ALT: ${altitudeUnit.label.uppercase()}" else altitudeUnit.label.uppercase(),
                                                             fontSize = 11.sp,
                                                             fontWeight = FontWeight.Bold,
                                                             color = uiAccent,
@@ -937,26 +1066,51 @@ fun MainScreen(
                                                     
                                                     Spacer(modifier = Modifier.width(12.dp))
 
+                                                    var isPressureSliding by remember { mutableStateOf(false) }
+                                                    var pressureDragAccumulator by remember { mutableStateOf(0f) }
+
                                                     Surface(
                                                         modifier = Modifier
                                                             .clip(RoundedCornerShape(32.dp))
-                                                            .border(0.5.dp, uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
+                                                            .border(0.5.dp, if (isPressureSliding) uiAccent else uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
                                                             .testTag("pressure_unit_toggle")
-                                                            .combinedClickable(
-                                                                onClick = {
-                                                                    val nextOrdinal = (pressureUnit.ordinal + 1) % PressureUnit.values().size
-                                                                    viewModel.selectPressureUnit(PressureUnit.values()[nextOrdinal])
-                                                                },
-                                                                onLongClick = {
-                                                                    val nextOrdinal = (pressureUnit.ordinal + 1) % PressureUnit.values().size
-                                                                    viewModel.selectPressureUnit(PressureUnit.values()[nextOrdinal])
-                                                                    viewModel.hapticEngine.playUnitSelection()
-                                                                }
-                                                            ),
-                                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.25f),
+                                                            .pointerInput(Unit) {
+                                                                detectDragGesturesAfterLongPress(
+                                                                    onDragStart = {
+                                                                        isPressureSliding = true
+                                                                        pressureDragAccumulator = 0f
+                                                                        viewModel.hapticEngine.doubleClick()
+                                                                    },
+                                                                    onDragEnd = { isPressureSliding = false },
+                                                                    onDragCancel = { isPressureSliding = false },
+                                                                    onDrag = { _, dragAmount ->
+                                                                        pressureDragAccumulator += dragAmount.x
+                                                                        val threshold = 70f
+                                                                        if (pressureDragAccumulator > threshold) {
+                                                                            val values = PressureUnit.values()
+                                                                            val nextIndex = (pressureUnit.ordinal + 1) % values.size
+                                                                            viewModel.selectPressureUnit(values[nextIndex])
+                                                                            viewModel.hapticEngine.playSpeedMilestoneTick()
+                                                                            pressureDragAccumulator = 0f
+                                                                        } else if (pressureDragAccumulator < -threshold) {
+                                                                            val values = PressureUnit.values()
+                                                                            val prevIndex = (pressureUnit.ordinal - 1 + values.size) % values.size
+                                                                            viewModel.selectPressureUnit(values[prevIndex])
+                                                                            viewModel.hapticEngine.playSpeedMilestoneTick()
+                                                                            pressureDragAccumulator = 0f
+                                                                        }
+                                                                    }
+                                                                )
+                                                            }
+                                                            .clickable {
+                                                                val nextOrdinal = (pressureUnit.ordinal + 1) % PressureUnit.values().size
+                                                                viewModel.selectPressureUnit(PressureUnit.values()[nextOrdinal])
+                                                                viewModel.hapticEngine.click()
+                                                            },
+                                                        color = MaterialTheme.colorScheme.surface.copy(alpha = if (isPressureSliding) 0.45f else 0.25f),
                                                     ) {
                                                         Text(
-                                                            text = pressureUnit.label.uppercase(),
+                                                            text = if (isPressureSliding) "BARO: ${pressureUnit.label.uppercase()}" else pressureUnit.label.uppercase(),
                                                             fontSize = 11.sp,
                                                             fontWeight = FontWeight.Bold,
                                                             color = uiAccent,

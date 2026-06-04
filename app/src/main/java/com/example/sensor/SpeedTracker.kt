@@ -38,9 +38,9 @@ class SpeedTracker(private val context: Context) {
     // For manual speed estimation when hardware doesn't report location.getSpeed()
     private var lastLocation: Location? = null
     
-    // Exponential Moving Average (EMA) smoothing factor (0.15 = higher smoothing, less jitter)
+    // Exponential Moving Average (EMA) smoothing factor (0.35 = extremely high responsiveness, live physical feedback)
     private var smoothedSpeed = 0f
-    private val smoothingFactor = 0.18f
+    private val smoothingFactor = 0.35f
 
     init {
         try {
@@ -60,9 +60,9 @@ class SpeedTracker(private val context: Context) {
 
         // 1. Priming Fused Location Client
         try {
-            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 500)
-                .setMinUpdateIntervalMillis(250)
-                .setWaitForAccurateLocation(false)
+            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 200)
+                .setMinUpdateIntervalMillis(100)
+                .setWaitForAccurateLocation(true)
                 .build()
 
             locationCallback = object : LocationCallback() {
