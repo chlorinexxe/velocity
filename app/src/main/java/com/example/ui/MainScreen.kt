@@ -259,12 +259,12 @@ fun MainScreen(
                                                         dragAccumulator += dragAmount.x
                                                         val threshold = 70f
                                                         if (dragAccumulator > threshold) {
-                                                            currentTempIndex = (currentTempIndex - 1 + 20) % 20
+                                                            currentTempIndex = (currentTempIndex - 1 + 30) % 30
                                                             viewModel.previewSpeedometerStyle(currentTempIndex)
                                                             viewModel.hapticEngine.playSpeedStyleSlide()
                                                             dragAccumulator = 0f
                                                         } else if (dragAccumulator < -threshold) {
-                                                            currentTempIndex = (currentTempIndex + 1) % 20
+                                                            currentTempIndex = (currentTempIndex + 1) % 30
                                                             viewModel.previewSpeedometerStyle(currentTempIndex)
                                                             viewModel.hapticEngine.playSpeedStyleSlide()
                                                             dragAccumulator = 0f
@@ -295,7 +295,7 @@ fun MainScreen(
                                                     .align(Alignment.TopCenter)
                                             ) {
                                                 Text(
-                                                    text = "DESIGN: ${activeSpeedometerIndex + 1} / 20",
+                                                    text = "DESIGN: ${activeSpeedometerIndex + 1} / 30",
                                                     color = Color.White,
                                                     fontSize = 10.sp,
                                                     fontWeight = FontWeight.Bold,
@@ -356,9 +356,9 @@ fun MainScreen(
                                         } else {
                                             AtmosphereDisplay(
                                                 animatedAltitude = animatedAltitude,
-                                                altitudeUnit = altitudeUnit.label,
+                                                altitudeUnit = altitudeUnit,
                                                 animatedPressure = animatedPressure,
-                                                pressureUnit = pressureUnit.label,
+                                                pressureUnit = pressureUnit,
                                                 verticalSpeed = verticalSpeedMPS,
                                                 styleIndex = activeAtmosphereIndex,
                                                 accentColor = uiAccent,
@@ -805,12 +805,12 @@ fun MainScreen(
                                                                 dragAccumulator += dragAmount.x
                                                                 val threshold = 70f
                                                                 if (dragAccumulator > threshold) {
-                                                                    currentTempIndex = (currentTempIndex - 1 + 20) % 20
+                                                                    currentTempIndex = (currentTempIndex - 1 + 30) % 30
                                                                     viewModel.previewSpeedometerStyle(currentTempIndex)
                                                                     viewModel.hapticEngine.playSpeedStyleSlide()
                                                                     dragAccumulator = 0f
                                                                 } else if (dragAccumulator < -threshold) {
-                                                                    currentTempIndex = (currentTempIndex + 1) % 20
+                                                                    currentTempIndex = (currentTempIndex + 1) % 30
                                                                     viewModel.previewSpeedometerStyle(currentTempIndex)
                                                                     viewModel.hapticEngine.playSpeedStyleSlide()
                                                                     dragAccumulator = 0f
@@ -915,7 +915,7 @@ fun MainScreen(
                                                     .align(Alignment.TopCenter)
                                             ) {
                                                 Text(
-                                                    text = "DESIGN PREVIEW: ${activeSpeedometerIndex + 1} / 20",
+                                                    text = "DESIGN PREVIEW: ${activeSpeedometerIndex + 1} / 30",
                                                     color = Color.White,
                                                     fontSize = 11.sp,
                                                     fontWeight = FontWeight.Bold,
@@ -978,12 +978,12 @@ fun MainScreen(
                                                                     dragAccumulator += dragAmount.x
                                                                     val threshold = 70f
                                                                     if (dragAccumulator > threshold) {
-                                                                        currentTempIndex = (currentTempIndex - 1 + 10) % 10
+                                                                        currentTempIndex = (currentTempIndex - 1 + 30) % 30
                                                                         viewModel.previewAtmosphereStyle(currentTempIndex)
                                                                         viewModel.hapticEngine.playAtmosphereStyleSlide()
                                                                         dragAccumulator = 0f
                                                                     } else if (dragAccumulator < -threshold) {
-                                                                        currentTempIndex = (currentTempIndex + 1) % 10
+                                                                        currentTempIndex = (currentTempIndex + 1) % 30
                                                                         viewModel.previewAtmosphereStyle(currentTempIndex)
                                                                         viewModel.hapticEngine.playAtmosphereStyleSlide()
                                                                         dragAccumulator = 0f
@@ -995,9 +995,9 @@ fun MainScreen(
                                                 ) {
                                                     AtmosphereDisplay(
                                                         animatedAltitude = animatedAltitude,
-                                                        altitudeUnit = altitudeUnit.label,
+                                                        altitudeUnit = altitudeUnit,
                                                         animatedPressure = animatedPressure,
-                                                        pressureUnit = pressureUnit.label,
+                                                        pressureUnit = pressureUnit,
                                                         verticalSpeed = verticalSpeedMPS,
                                                         styleIndex = activeAtmosphereIndex,
                                                         accentColor = uiAccent,
@@ -1135,7 +1135,7 @@ fun MainScreen(
                                                     .align(Alignment.TopCenter)
                                             ) {
                                                 Text(
-                                                    text = "STYLE PREVIEW: ${activeAtmosphereIndex + 1} / 10",
+                                                    text = "STYLE PREVIEW: ${activeAtmosphereIndex + 1} / 30",
                                                     color = Color.White,
                                                     fontSize = 11.sp,
                                                     fontWeight = FontWeight.Bold,
@@ -1351,6 +1351,33 @@ fun PermissionFallbackScreen(
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.5.sp
+            )
+        }
+    }
+}
+
+@Composable
+fun MidCarouselDots(
+    isActive0: Boolean,
+    isActive1: Boolean,
+    isActive2: Boolean,
+    uiText: Color,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+    ) {
+        val states = listOf(isActive0, isActive1, isActive2)
+        for (isActive in states) {
+            val dotColor = if (isActive) uiText else uiText.copy(alpha = 0.2f)
+            val dotWidth = if (isActive) 12.dp else 4.dp
+            Box(
+                modifier = Modifier
+                    .size(width = dotWidth, height = 4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(dotColor)
             )
         }
     }

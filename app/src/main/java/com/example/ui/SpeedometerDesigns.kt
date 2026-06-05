@@ -1436,7 +1436,7 @@ fun BarChartHorizontal(speed: Float, unit: String, accent: Color, textCol: Color
                 )
                 if (widthFactor > 0f) {
                     drawRoundRect(
-                        color = Brush.horizontalGradient(listOf(accent.copy(alpha = 0.6f), accent)),
+                        brush = Brush.horizontalGradient(listOf(accent.copy(alpha = 0.6f), accent)),
                         size = Size(size.width * widthFactor, size.height),
                         cornerRadius = CornerRadius(4.dp.toPx())
                     )

@@ -17,6 +17,9 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -27,9 +30,9 @@ import kotlin.math.sin
 @Composable
 fun AtmosphereDisplay(
     animatedAltitude: Float,
-    altitudeUnit: String,
+    altitudeUnit: AltitudeUnit,
     animatedPressure: Float,
-    pressureUnit: String,
+    pressureUnit: PressureUnit,
     verticalSpeed: Float, // climb descent rate in m/s
     styleIndex: Int,
     accentColor: Color,
@@ -41,16 +44,16 @@ fun AtmosphereDisplay(
         contentAlignment = Alignment.Center
     ) {
         when (styleIndex) {
-            0 -> MinimalNumberStyle(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            1 -> CircularPressureRing(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            2 -> VerticalAltitudeScale(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            3 -> PressureWaveStyle(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            4 -> GradientHorizonStyle(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            5 -> PrecisionGaugeStyle(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            6 -> FloatingDigitsStyle(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            7 -> DotMatrixStyle(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            8 -> LineIndicatorStyle(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            9 -> UltraMinimalStyle(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            0 -> MinimalNumberStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+            1 -> CircularPressureRing(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+            2 -> VerticalAltitudeScale(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+            3 -> PressureWaveStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+            4 -> GradientHorizonStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+            5 -> PrecisionGaugeStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+            6 -> FloatingDigitsStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+            7 -> DotMatrixStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+            8 -> LineIndicatorStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+            9 -> UltraMinimalStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
             10 -> RetroGridTerrain(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
             11 -> PressureThermal(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
             12 -> DualConcentric(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
@@ -71,7 +74,7 @@ fun AtmosphereDisplay(
             27 -> HexagonalAtmo(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
             28 -> SlinkyAltitude(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
             29 -> SoundWaveAtmosphere(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            else -> MinimalNumberStyle(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            else -> MinimalNumberStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
         }
     }
 }
