@@ -82,7 +82,6 @@ val SlateBg = Color(0xFFEFF2F6)
 val SlateSurface = Color(0xFFFFFFFF)
 val SlatePrimary = Color(0xFF1F2933)
 val SlateOnBg = Color(0xFF2D3748)
-val SlateAccent = Color(0xFF7C8BA5) // muted steel blue
 
 val ForestBg = Color(0xFFF3F7F5)
 val ForestSurface = Color(0xFFFFFFFF)
@@ -163,6 +162,8 @@ val SandSurface = Color(0xFFF4EDE4)
 val SandPrimary = Color(0xFF2B2621)
 val SandOnBg = Color(0xFF3D362F)
 val SandAccent = Color(0xFF8B5E3C)
+
+
 
 val SlateAccent = Color(0xFF5EADFF) // sharpened icy blue
 
