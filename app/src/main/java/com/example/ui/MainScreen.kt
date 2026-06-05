@@ -301,9 +301,9 @@ fun MainScreen(
                                         ) {
                                             Box(
                                                 modifier = Modifier
-                                                    .padding(top = 10.dp)
+                                                    .padding(bottom = 8.dp)
                                                     .background(uiAccent.copy(alpha = 0.85f), RoundedCornerShape(12.dp))
-                                                    .align(Alignment.TopCenter)
+                                                    .align(Alignment.BottomCenter)
                                             ) {
                                                 Text(
                                                     text = "DESIGN: ${activeSpeedometerIndex + 1} / 30",
@@ -532,14 +532,14 @@ fun MainScreen(
                         ) {
                             // 1. Double GPS Telemetry & Altitude Source Option (Barometer vs GPS)
                             if (pageIndex != 3) {
-                                val altSource = altitudeSource
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 6.dp, top = 6.dp),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(16.dp))
                                         .background(uiText.copy(alpha = 0.04f))
@@ -550,261 +550,40 @@ fun MainScreen(
                                         )
                                         .padding(horizontal = 12.dp, vertical = 6.dp)
                                 ) {
+
                                     Box(
                                         modifier = Modifier
                                             .size(6.dp)
-                                            .background(Color(0xFFFFCC00), CircleShape)
+                                            .background(uiAccent, CircleShape)
                                     )
-                                    Text(
-                                        text = "DIRECT GPS",
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = uiText.copy(alpha = 0.7f),
-                                        letterSpacing = 1.sp
-                                    )
-                                }
 
-                                // Interactive Altitude Source Option Toggle
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(16.dp))
-                                        .background(if (altSource == AltitudeSource.GPS) uiAccent.copy(alpha = 0.12f) else uiText.copy(alpha = 0.04f))
-                                        .border(
-                                            0.5.dp,
-                                            if (altSource == AltitudeSource.GPS) uiAccent else uiText.copy(alpha = 0.12f),
-                                            RoundedCornerShape(16.dp)
-                                        )
-                                        .clickable {
-                                            val nextSource = if (altSource == AltitudeSource.BAROMETER) AltitudeSource.GPS else AltitudeSource.BAROMETER
-                                            viewModel.setAltitudeSource(nextSource)
-                                            viewModel.hapticEngine.click()
-                                        }
-                                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                                ) {
-                                    Canvas(modifier = Modifier.size(6.dp)) {
-                                        drawCircle(color = if (altSource == AltitudeSource.GPS) uiAccent else uiText.copy(alpha = 0.5f))
-                                    }
+                                    Spacer(modifier = Modifier.width(6.dp))
+
                                     Text(
-                                        text = if (altSource == AltitudeSource.GPS) "GPS ALT" else "BARO ALT",
+                                        text = "BARO ALT",
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = if (altSource == AltitudeSource.GPS) uiAccent else uiText.copy(alpha = 0.7f),
+                                        color = uiAccent,
                                         letterSpacing = 1.sp
                                     )
                                 }
                             }
-                            }
+                        }
 
                             // 2. Metric system indicator / selector badges
                             Box(
                                 modifier = Modifier.weight(1f),
                                 contentAlignment = Alignment.Center
-                            ) {
-                                if (pageIndex != 3) {
-                                    if (pageIndex == 0) {
-                                        var isSpeedLandSliding by remember { mutableStateOf(false) }
-                                        var speedLandDragAccumulator by remember { mutableStateOf(0f) }
-
-                                    Surface(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(32.dp))
-                                            .border(0.5.dp, if (isSpeedLandSliding) uiAccent else uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
-                                            .testTag("speed_unit_toggle_landscape")
-                                            .pointerInput(Unit) {
-                                                detectDragGesturesAfterLongPress(
-                                                    onDragStart = {
-                                                        isSpeedLandSliding = true
-                                                        speedLandDragAccumulator = 0f
-                                                        viewModel.hapticEngine.doubleClick()
-                                                    },
-                                                    onDragEnd = { isSpeedLandSliding = false },
-                                                    onDragCancel = { isSpeedLandSliding = false },
-                                                    onDrag = { _, dragAmount ->
-                                                        speedLandDragAccumulator += dragAmount.x
-                                                        val threshold = 70f
-                                                        if (speedLandDragAccumulator > threshold) {
-                                                            val values = SpeedUnit.values()
-                                                            val nextIdx = (currentSpeedUnitState.ordinal + 1) % values.size
-                                                            viewModel.selectSpeedUnit(values[nextIdx])
-                                                            viewModel.hapticEngine.playSpeedMilestoneTick()
-                                                            speedLandDragAccumulator = 0f
-                                                        } else if (speedLandDragAccumulator < -threshold) {
-                                                            val values = SpeedUnit.values()
-                                                            val prevIdx = (currentSpeedUnitState.ordinal - 1 + values.size) % values.size
-                                                            viewModel.selectSpeedUnit(values[prevIdx])
-                                                            viewModel.hapticEngine.playSpeedMilestoneTick()
-                                                            speedLandDragAccumulator = 0f
-                                                        }
-                                                    }
-                                                )
-                                            }
-                                            .clickable {
-                                                val nextUnitOrdinal = (speedUnit.ordinal + 1) % SpeedUnit.values().size
-                                                viewModel.selectSpeedUnit(SpeedUnit.values()[nextUnitOrdinal])
-                                                viewModel.hapticEngine.click()
-                                            },
-                                        color = MaterialTheme.colorScheme.surface.copy(alpha = if (isSpeedLandSliding) 0.45f else 0.25f)
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Text(
-                                                text = if (isSpeedLandSliding) "UNIT: ${speedUnit.name}" else speedUnit.name,
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = uiAccent,
-                                                letterSpacing = 1.sp
-                                            )
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text(
-                                                text = if (isSpeedLandSliding) "◀ SLIDE ▶" else "• HOLD & SLIDE",
-                                                fontSize = 9.sp,
-                                                fontWeight = FontWeight.Medium,
-                                                color = if (isSpeedLandSliding) uiAccent else uiText.copy(alpha = 0.25f)
-                                            )
-                                        }
-                                    }
-                                } else if (pageIndex == 1 || pageIndex == 3) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        var isAltitudeLandSliding by remember { mutableStateOf(false) }
-                                        var altitudeLandDragAccumulator by remember { mutableStateOf(0f) }
-
-                                        Surface(
-                                            modifier = Modifier
-                                                .clip(RoundedCornerShape(32.dp))
-                                                .border(0.5.dp, if (isAltitudeLandSliding) uiAccent else uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
-                                                .testTag("altitude_unit_toggle_landscape")
-                                                .pointerInput(Unit) {
-                                                    detectDragGesturesAfterLongPress(
-                                                        onDragStart = {
-                                                            isAltitudeLandSliding = true
-                                                            altitudeLandDragAccumulator = 0f
-                                                            viewModel.hapticEngine.doubleClick()
-                                                        },
-                                                        onDragEnd = { isAltitudeLandSliding = false },
-                                                        onDragCancel = { isAltitudeLandSliding = false },
-                                                        onDrag = { _, dragAmount ->
-                                                            altitudeLandDragAccumulator += dragAmount.x
-                                                            val threshold = 70f
-                                                            if (altitudeLandDragAccumulator > threshold) {
-                                                                val values = AltitudeUnit.values()
-                                                                val nextIdx = (currentAltitudeUnitState.ordinal + 1) % values.size
-                                                                viewModel.selectAltitudeUnit(values[nextIdx])
-                                                                viewModel.hapticEngine.playSpeedMilestoneTick()
-                                                                altitudeLandDragAccumulator = 0f
-                                                            } else if (altitudeLandDragAccumulator < -threshold) {
-                                                                val values = AltitudeUnit.values()
-                                                                val prevIdx = (currentAltitudeUnitState.ordinal - 1 + values.size) % values.size
-                                                                viewModel.selectAltitudeUnit(values[prevIdx])
-                                                                viewModel.hapticEngine.playSpeedMilestoneTick()
-                                                                altitudeLandDragAccumulator = 0f
-                                                            }
-                                                        }
-                                                    )
-                                                }
-                                                .clickable {
-                                                    val nextOrdinal = (altitudeUnit.ordinal + 1) % AltitudeUnit.values().size
-                                                    viewModel.selectAltitudeUnit(AltitudeUnit.values()[nextOrdinal])
-                                                    viewModel.hapticEngine.click()
-                                                },
-                                            color = MaterialTheme.colorScheme.surface.copy(alpha = if (isAltitudeLandSliding) 0.45f else 0.25f),
-                                        ) {
-                                            Text(
-                                                text = if (isAltitudeLandSliding) "ALT: ${altitudeUnit.label.uppercase()}" else altitudeUnit.label.uppercase(),
-                                                fontSize = 10.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = uiAccent,
-                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                                letterSpacing = 1.sp
-                                            )
-                                        }
-
-                                        Spacer(modifier = Modifier.width(8.dp))
-
-                                        var isPressureLandSliding by remember { mutableStateOf(false) }
-                                        var pressureLandDragAccumulator by remember { mutableStateOf(0f) }
-
-                                        Surface(
-                                            modifier = Modifier
-                                                .clip(RoundedCornerShape(32.dp))
-                                                .border(0.5.dp, if (isPressureLandSliding) uiAccent else uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
-                                                .testTag("pressure_unit_toggle_landscape")
-                                                .pointerInput(Unit) {
-                                                    detectDragGesturesAfterLongPress(
-                                                        onDragStart = {
-                                                            isPressureLandSliding = true
-                                                            pressureLandDragAccumulator = 0f
-                                                            viewModel.hapticEngine.doubleClick()
-                                                        },
-                                                        onDragEnd = { isPressureLandSliding = false },
-                                                        onDragCancel = { isPressureLandSliding = false },
-                                                        onDrag = { _, dragAmount ->
-                                                            pressureLandDragAccumulator += dragAmount.x
-                                                            val threshold = 70f
-                                                            if (pressureLandDragAccumulator > threshold) {
-                                                                val values = PressureUnit.values()
-                                                                val nextIdx = (currentPressureUnitState.ordinal + 1) % values.size
-                                                                viewModel.selectPressureUnit(values[nextIdx])
-                                                                viewModel.hapticEngine.playSpeedMilestoneTick()
-                                                                pressureLandDragAccumulator = 0f
-                                                            } else if (pressureLandDragAccumulator < -threshold) {
-                                                                val values = PressureUnit.values()
-                                                                val prevIdx = (currentPressureUnitState.ordinal - 1 + values.size) % values.size
-                                                                viewModel.selectPressureUnit(values[prevIdx])
-                                                                viewModel.hapticEngine.playSpeedMilestoneTick()
-                                                                pressureLandDragAccumulator = 0f
-                                                            }
-                                                        }
-                                                    )
-                                                }
-                                                .clickable {
-                                                    val nextOrdinal = (pressureUnit.ordinal + 1) % PressureUnit.values().size
-                                                    viewModel.selectPressureUnit(PressureUnit.values()[nextOrdinal])
-                                                    viewModel.hapticEngine.click()
-                                                },
-                                            color = MaterialTheme.colorScheme.surface.copy(alpha = if (isPressureLandSliding) 0.45f else 0.25f),
-                                        ) {
-                                            Text(
-                                                text = if (isPressureLandSliding) "BARO: ${pressureUnit.label.uppercase()}" else pressureUnit.label.uppercase(),
-                                                fontSize = 10.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = uiAccent,
-                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                                letterSpacing = 1.sp
-                                            )
-                                        }
-                                    }
-                                } else {
-                                    // Compass index case 2
-                                    Surface(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(32.dp))
-                                            .border(0.5.dp, uiText.copy(alpha = 0.08f), RoundedCornerShape(32.dp)),
-                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.25f)
-                                    ) {
-                                        Text(
-                                            text = "HEADING: ${headingDegrees.roundToInt()}°",
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = uiAccent,
-                                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                                            letterSpacing = 1.sp
-                                        )
-                                    }
-                                }
-                                }
+                            ){
+                                
                             }
 
                             // 3. Compact landscape footer (theme gear and page indicators)
                             Row(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
-                                horizontalArrangement = if (pageIndex == 3) Arrangement.Center else Arrangement.SpaceBetween,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 6.dp),
+                                horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 // Theme gear
@@ -829,10 +608,12 @@ fun MainScreen(
                                     )
                                 }
 
-                                if (pageIndex != 3) {
-                                    // Carousel Dots
-                                    MidCarouselDots(pageIndex = Math.floorMod(pagerState.currentPage, 4), uiText = uiText)
-                                }
+                                   if (pageIndex != 3) {
+                                        MidCarouselDots(
+                                            pageIndex = Math.floorMod(pagerState.currentPage, 4),
+                                            uiText = uiText
+                                        )
+                                    }
                             }
                         }
                     }
