@@ -31,7 +31,6 @@
 ### Prerequisites
 
 - [Android Studio](https://developer.android.com/studio) (latest stable)
-- A valid `GEMINI_API_KEY` (set in your `.env` file)
 
 ### Run Locally
 
@@ -44,14 +43,8 @@
 2. **Open in Android Studio**
    Select **File → Open** and choose the project directory. Allow Android Studio to resolve any import incompatibilities automatically.
 
-3. **Configure your API key**
-   Create a `.env` file in the project root:
-   ```env
-   GEMINI_API_KEY=your_api_key_here
-   ```
-   Refer to `.env.example` for the expected format.
 
-4. **Fix signing config**
+3. **Fix signing config**
    In `app/build.gradle.kts`, remove the following line before running:
    ```kotlin
    signingConfig = signingConfigs.getByName("debugConfig")
