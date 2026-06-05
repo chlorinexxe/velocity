@@ -27,6 +27,14 @@ import androidx.compose.ui.unit.sp
 import kotlin.math.cos
 import kotlin.math.sin
 
+fun dynamicMaxSpeed(speed: Float): Float {
+    var maxVal = 160f
+    while (speed > maxVal * 0.85f && maxVal < 100000f) {
+        maxVal *= 2f
+    }
+    return maxVal
+}
+
 @Composable
 fun SpeedometerDisplay(
     animatedSpeed: Float,
@@ -103,7 +111,7 @@ fun PureDigital(speed: Float, unit: String, accent: Color, textCol: Color) {
         Spacer(modifier = Modifier.height(24.dp))
         // Progress bar scaling from center
         Canvas(modifier = Modifier.width(180.dp).height(4.dp)) {
-            val progress = (speed / 160f).coerceIn(0f, 1f)
+            val progress = (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f)
             val w = size.width
             val h = size.height
             // Track
@@ -145,7 +153,7 @@ fun ThinRing(speed: Float, unit: String, accent: Color, textCol: Color) {
             )
 
             // Active Arc
-            val sweepAngle = (speed / 160f).coerceIn(0f, 1f) * 360f
+            val sweepAngle = (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f) * 360f
             drawArc(
                 color = accent,
                 startAngle = -90f,
@@ -170,7 +178,7 @@ fun SplitArc(speed: Float, unit: String, accent: Color, textCol: Color) {
             val r = size.minDimension / 2f - 24.dp.toPx()
             val center = Offset(size.width / 2f, size.height / 2f)
             val stroke = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
-            val progress = (speed / 160f).coerceIn(0f, 1f)
+            val progress = (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f)
 
             // Left track
             drawArc(
@@ -230,7 +238,7 @@ fun AnalogNeedle(speed: Float, unit: String, accent: Color, textCol: Color) {
             val minAngle = 135f
             val maxAngle = 405f
             val totalAngle = maxAngle - minAngle
-            val progress = (speed / 160f).coerceIn(0f, 1f)
+            val progress = (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f)
             val targetAngle = minAngle + totalAngle * progress
 
             // Draw Dial markings
@@ -513,7 +521,7 @@ fun EdgeGauge(speed: Float, unit: String, accent: Color, textCol: Color) {
         Canvas(modifier = Modifier.fillMaxWidth().height(140.dp).align(Alignment.TopCenter)) {
             val w = size.width
             val h = size.height
-            val progress = (speed / 160f).coerceIn(0f, 1f)
+            val progress = (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f)
 
             val startPoint = Offset(-20.dp.toPx(), shadowOffset)
             val controlPoint = Offset(w / 2f, h * 1.3f)
@@ -801,7 +809,7 @@ fun ConcentricRings(speed: Float, unit: String, accent: Color, textCol: Color) {
             val baseR = size.minDimension / 2f - 40.dp.toPx()
 
             // 1. Outer Ring (Baseline Speed progress arc)
-            val p1 = (speed / 160f).coerceIn(0f, 1f)
+            val p1 = (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f)
             drawCircle(
                 color = textCol.copy(alpha = 0.05f),
                 radius = baseR,
@@ -873,7 +881,7 @@ fun WaveMeter(speed: Float, unit: String, accent: Color, textCol: Color) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val r = size.minDimension / 2f - 20.dp.toPx()
             val center = Offset(size.width / 2f, size.height / 2f)
-            val progress = (speed / 160f).coerceIn(0f, 1f)
+            val progress = (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f)
 
             // Dynamic water level height inside circle
             val waveHeightY = center.y + r - (r * 2 * progress)
@@ -960,7 +968,7 @@ fun GlassRing(speed: Float, unit: String, accent: Color, textCol: Color) {
             )
 
             // Bright sweeping active accent arc inside the frame
-            val sweep = (speed / 160f).coerceIn(0f, 1f) * 360f
+            val sweep = (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f) * 360f
             drawArc(
                 color = accent,
                 startAngle = -90f,
@@ -988,7 +996,7 @@ fun TeslaInspired(speed: Float, unit: String, accent: Color, textCol: Color) {
         Canvas(modifier = Modifier.width(240.dp).height(12.dp)) {
             val w = size.width
             val h = size.height
-            val progress = (speed / 160f).coerceIn(0f, 1f)
+            val progress = (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f)
 
             // Rail track
             drawRoundRect(
@@ -1057,7 +1065,7 @@ fun NothingInspired(speed: Float, unit: String, accent: Color, textCol: Color) {
             drawLine(textCol, Offset(w, h), Offset(w, h - bracketLen), bracketStroke)
 
             // Dynamic vertical bar inside margins
-            val fillPercent = (speed / 160f).coerceIn(0f, 1f)
+            val fillPercent = (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f)
             val dotCount = 18
             val dotSpacing = h / dotCount
             for (i in 0 until dotCount) {
@@ -1128,7 +1136,7 @@ fun AdaptiveGauge(speed: Float, unit: String, accent: Color, textCol: Color) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2f, size.height / 2f)
             val baseR = size.minDimension / 2f - 30.dp.toPx()
-            val progress = (speed / 160f).coerceIn(0f, 1f)
+            val progress = (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f)
             val sides = 6 // Hexagon outline
 
             val pathTrack = Path()
@@ -1268,7 +1276,7 @@ fun SpeedValueCentered(speed: Float, unit: String, textCol: Color, accent: Color
 fun CyberpunkNeon(speed: Float, unit: String, accent: Color, textCol: Color) {
     Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val progress = (speed / 160f).coerceIn(0f, 1f)
+            val progress = (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f)
             val center = Offset(size.width / 2f, size.height / 2f)
             val radius = size.minDimension / 2f - 30.dp.toPx()
             
@@ -1358,7 +1366,7 @@ fun Chronograph(speed: Float, unit: String, accent: Color, textCol: Color) {
                 )
             }
             
-            val speedAngle = -90f + (speed / 160f).coerceIn(0f, 1f) * 270f
+            val speedAngle = -90f + (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f) * 270f
             val needleRad = Math.toRadians(speedAngle.toDouble())
             val needleLen = radius - 15.dp.toPx()
             drawLine(
@@ -1424,7 +1432,7 @@ fun BarChartHorizontal(speed: Float, unit: String, accent: Color, textCol: Color
         )
         Spacer(modifier = Modifier.height(20.dp))
         
-        val progress = (speed / 160f).coerceIn(0f, 1f)
+        val progress = (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f)
         for (row in 0 until 4) {
             val limit = (row + 1) / 4f
             val widthFactor = if (progress >= limit) 1f else if (progress < limit - 0.25f) 0f else (progress - (limit - 0.25f)) / 0.25f
@@ -1463,8 +1471,8 @@ fun DoubleNeedle(speed: Float, unit: String, accent: Color, textCol: Color) {
                 style = Stroke(width = 1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 15f)))
             )
             
-            val angleLeft = 180f + (speed / 160f).coerceIn(0f, 1f) * 90f
-            val angleRight = 360f - (speed / 160f).coerceIn(0f, 1f) * 90f
+            val angleLeft = 180f + (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f) * 90f
+            val angleRight = 360f - (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f) * 90f
             
             val radL = Math.toRadians(angleLeft.toDouble())
             val radR = Math.toRadians(angleRight.toDouble())
@@ -1511,7 +1519,7 @@ fun SectorRadar(speed: Float, unit: String, accent: Color, textCol: Color) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2f, size.height / 2f)
             val radius = size.minDimension / 2f - 30.dp.toPx()
-            val progress = (speed / 160f).coerceIn(0f, 1f)
+            val progress = (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f)
             
             for (r in listOf(0.3f, 0.6f, 1.0f)) {
                 drawCircle(
@@ -1593,7 +1601,7 @@ fun FuturisticRibbon(speed: Float, unit: String, accent: Color, textCol: Color) 
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2f, size.height / 2f)
             val radius = size.minDimension / 2f - 40.dp.toPx()
-            val progress = (speed / 160f).coerceIn(0f, 1f)
+            val progress = (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f)
             
             val trackPath = Path().apply {
                 moveTo(center.x - radius, center.y + radius)
@@ -1654,7 +1662,7 @@ fun LiquidCore(speed: Float, unit: String, accent: Color, textCol: Color) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2f, size.height / 2f)
             val maxRadius = size.minDimension / 2f - 40.dp.toPx()
-            val progress = (speed / 160f).coerceIn(0f, 1f)
+            val progress = (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f)
             val currentRadius = 30.dp.toPx() + (maxRadius - 30.dp.toPx()) * progress
             
             drawCircle(
@@ -1754,7 +1762,7 @@ fun MatrixRain(speed: Float, unit: String, accent: Color, textCol: Color) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2f, size.height / 2f)
             val radius = size.minDimension / 2f - 20.dp.toPx()
-            val progress = (speed / 160f).coerceIn(0f, 1f)
+            val progress = (speed / dynamicMaxSpeed(speed)).coerceIn(0f, 1f)
             
             drawCircle(
                 color = textCol.copy(alpha = 0.05f),

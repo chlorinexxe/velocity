@@ -33,6 +33,11 @@ enum class AltitudeUnit(val label: String) {
     FEET("feet")
 }
 
+enum class AltitudeSource {
+    BAROMETER,
+    GPS
+}
+
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val speedTracker = SpeedTracker(application)
@@ -66,6 +71,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val isBarometerAvailable: StateFlow<Boolean> = atmosphereTracker.isBarometerAvailable
 
     // Selected Units
+    private val _altitudeSource = MutableStateFlow(AltitudeSource.BAROMETER)
+    val altitudeSource: StateFlow<AltitudeSource> = _altitudeSource.asStateFlow()
+
     private val _speedUnit = MutableStateFlow(SpeedUnit.KMH)
     val speedUnit: StateFlow<SpeedUnit> = _speedUnit.asStateFlow()
 
@@ -121,7 +129,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
         viewModelScope.launch {
             atmosphereTracker.estimatedAltitudeMeters.collect { altitude ->
-                _rawAltitudeMeters.value = altitude
+                if (_altitudeSource.value == AltitudeSource.BAROMETER) {
+                    _rawAltitudeMeters.value = altitude
+                }
+            }
+        }
+        viewModelScope.launch {
+            speedTracker.gpsAltitudeMeters.collect { altitude ->
+                if (_altitudeSource.value == AltitudeSource.GPS) {
+                    _rawAltitudeMeters.value = altitude
+                }
             }
         }
         viewModelScope.launch {
@@ -167,6 +184,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (_altitudeUnit.value != unit) {
             _altitudeUnit.value = unit
             hapticEngine.playUnitSelection()
+        }
+    }
+
+    fun setAltitudeSource(source: AltitudeSource) {
+        if (_altitudeSource.value != source) {
+            _altitudeSource.value = source
+            hapticEngine.playUnitSelection()
+            _rawAltitudeMeters.value = if (source == AltitudeSource.BAROMETER) {
+                atmosphereTracker.estimatedAltitudeMeters.value
+            } else {
+                speedTracker.gpsAltitudeMeters.value
+            }
         }
     }
 

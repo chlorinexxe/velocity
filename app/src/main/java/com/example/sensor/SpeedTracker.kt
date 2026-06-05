@@ -27,6 +27,9 @@ class SpeedTracker(private val context: Context) {
     private val _gpsAccuracy = MutableStateFlow(0f) // in meters
     val gpsAccuracy: StateFlow<Float> = _gpsAccuracy.asStateFlow()
 
+    private val _gpsAltitudeMeters = MutableStateFlow(0f) // in meters
+    val gpsAltitudeMeters: StateFlow<Float> = _gpsAltitudeMeters.asStateFlow()
+
     private val _isTracking = MutableStateFlow(false)
     val isTracking: StateFlow<Boolean> = _isTracking.asStateFlow()
 
@@ -144,6 +147,9 @@ class SpeedTracker(private val context: Context) {
 
     private fun processNewLocation(location: Location) {
         _gpsAccuracy.value = location.accuracy
+        if (location.hasAltitude()) {
+            _gpsAltitudeMeters.value = location.altitude.toFloat()
+        }
 
         var rawSpeed = 0f
         if (location.hasSpeed()) {

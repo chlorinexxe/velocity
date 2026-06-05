@@ -27,6 +27,13 @@ import androidx.compose.ui.unit.sp
 import kotlin.math.cos
 import kotlin.math.sin
 
+fun selectPressureProgress(pressure: Float): Float {
+    if (pressure >= 950f && pressure <= 1050f) {
+        return ((pressure - 950f) / 100f).coerceIn(0f, 1f)
+    }
+    return ((pressure - 200f) / 850f).coerceIn(0f, 1f)
+}
+
 @Composable
 fun AtmosphereDisplay(
     animatedAltitude: Float,
@@ -208,7 +215,7 @@ fun CircularPressureRing(
             )
 
             // Dynamic pressure arc mapping from 950hPa (0%) to 1050hPa (100%)
-            val pressPercent = ((press - 950f) / 100f).coerceIn(0f, 1f)
+            val pressPercent = selectPressureProgress(press)
             val sweepAngle = pressPercent * 360f
 
             drawArc(
@@ -579,7 +586,7 @@ fun PrecisionGaugeStyle(
             )
 
             // Second pointer: Pressure (sweeps clockwise based on sensor bounds)
-            val pressPercent = ((press - 950f) / 100f).coerceIn(0f, 1f)
+            val pressPercent = selectPressureProgress(press)
             val pointer2Angle = (pressPercent * 360f) - 90f
             val rad2 = Math.toRadians(pointer2Angle.toDouble())
             drawLine(
@@ -952,7 +959,7 @@ fun PressureThermal(
                 style = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round)
             )
             
-            val progress = ((pressure - 950f) / 100f).coerceIn(0f, 1f)
+            val progress = selectPressureProgress(pressure)
             val angle = 135f + 270f * progress
             val rad = Math.toRadians(angle.toDouble())
             drawCircle(
@@ -1004,7 +1011,7 @@ fun DualConcentric(
                 style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
             )
             
-            val pressProgress = ((pressure - 950f) / 100f).coerceIn(0f, 1f)
+            val pressProgress = selectPressureProgress(pressure)
             drawArc(
                 color = textColor.copy(alpha = 0.1f),
                 startAngle = -45f,
@@ -1189,7 +1196,7 @@ fun LiquidColumn(
                 style = Stroke(width = 2.dp.toPx())
             )
             
-            val progress = ((pressure - 950f) / 100f).coerceIn(0f, 1f)
+            val progress = selectPressureProgress(pressure)
             val fillHeight = tubeH * progress
             drawRoundRect(
                 color = accentColor,
@@ -1403,7 +1410,7 @@ fun ChronoAtmo(
                 )
             }
             
-            val progress = ((pressure - 950f) / 100f).coerceIn(0f, 1f)
+            val progress = selectPressureProgress(pressure)
             val sweepAngle = -90f + progress * 360f
             val radSweep = Math.toRadians(sweepAngle.toDouble())
             drawLine(
@@ -1515,7 +1522,7 @@ fun MinimalistArcDial(
                 style = Stroke(width = 6.dp.toPx(), cap = StrokeCap.Round)
             )
             
-            val pressProgress = ((pressure - 950f) / 100f).coerceIn(0f, 1f)
+            val pressProgress = selectPressureProgress(pressure)
             drawArc(
                 color = textColor.copy(alpha = 0.1f),
                 startAngle = -60f,
