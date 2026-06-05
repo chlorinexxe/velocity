@@ -1707,59 +1707,7 @@ fun MidCarouselDots(
     }
 }
 
-@Composable
-fun LandscapeOverlayControls(
-    pageIndex: Int,
-    viewModel: YourViewModel,
-    altitudeSource: AltitudeSource,
-    speedUnit: SpeedUnit,
-    altitudeUnit: AltitudeUnit,
-    pressureUnit: PressureUnit,
-    currentTheme: AppTheme
-) {
-    Box(modifier = Modifier.fillMaxSize()) {
 
-        // TOP RIGHT: altitude source toggle (only where needed)
-        if (pageIndex == 1 || pageIndex == 3) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(16.dp)
-            ) {
-                AltitudeSourceToggle(...)
-            }
-        }
-
-        // BOTTOM CENTER: unit selectors
-        if (pageIndex != 3) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp)
-            ) {
-                UnitSelectors(...)
-            }
-        }
-
-        // THEME BUTTON stays floating
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(16.dp)
-        ) {
-            ThemeButton(...)
-        }
-
-        // page dots
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 8.dp)
-        ) {
-            MidCarouselDots(pageIndex, uiText)
-        }
-    }
-}
 
 fun getCardinalDirection(degrees: Float): String {
     val directions = listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
