@@ -232,19 +232,13 @@ fun MainScreen(
                     // --------------------------------------------------
                     // LANDSCAPE COCKPIT DASHBOARD LAYOUT
                     // --------------------------------------------------
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // LEFT VIEWPORT: Beautiful expansive Speed or Atmosphere dial
                         Box(
-                            modifier = Modifier
-                                .weight(1.3f)
-                                .fillMaxHeight(),
-                            contentAlignment = Alignment.Center
-                        ) {
+                        modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ){
+                        // LEFT VIEWPORT: Beautiful expansive Speed or Atmosphere dial
+                      
                             HorizontalPager(
                                 state = pagerState,
                                 modifier = Modifier.fillMaxSize()
@@ -479,11 +473,15 @@ fun MainScreen(
                                     }
                                 } else {
                                     // 4th Page: Combined side-by-side view in landscape!
+                                   Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     Row(
-                                        modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
+
                                         Box(
                                             modifier = Modifier.weight(1f).fillMaxHeight(),
                                             contentAlignment = Alignment.Center
@@ -496,6 +494,7 @@ fun MainScreen(
                                                 textColor = uiText
                                             )
                                         }
+
                                         Box(
                                             modifier = Modifier.weight(1f).fillMaxHeight(),
                                             contentAlignment = Alignment.Center
@@ -503,8 +502,6 @@ fun MainScreen(
                                             if (!isBarometerAvailable) {
                                                 Text(
                                                     text = "Barometer Unavailable",
-                                                    fontSize = 12.sp,
-                                                    fontWeight = FontWeight.Light,
                                                     color = uiText.copy(alpha = 0.5f)
                                                 )
                                             } else {
@@ -1706,6 +1703,60 @@ fun MidCarouselDots(
                     .clip(RoundedCornerShape(2.dp))
                     .background(dotColor)
             )
+        }
+    }
+}
+
+@Composable
+fun LandscapeOverlayControls(
+    pageIndex: Int,
+    viewModel: YourViewModel,
+    altitudeSource: AltitudeSource,
+    speedUnit: SpeedUnit,
+    altitudeUnit: AltitudeUnit,
+    pressureUnit: PressureUnit,
+    currentTheme: AppTheme
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        // TOP RIGHT: altitude source toggle (only where needed)
+        if (pageIndex == 1 || pageIndex == 3) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp)
+            ) {
+                AltitudeSourceToggle(...)
+            }
+        }
+
+        // BOTTOM CENTER: unit selectors
+        if (pageIndex != 3) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp)
+            ) {
+                UnitSelectors(...)
+            }
+        }
+
+        // THEME BUTTON stays floating
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(16.dp)
+        ) {
+            ThemeButton(...)
+        }
+
+        // page dots
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 8.dp)
+        ) {
+            MidCarouselDots(pageIndex, uiText)
         }
     }
 }
