@@ -213,6 +213,17 @@ fun MainScreen(
                     }
                 }
 
+                // Premium haptics: Compass mechanical ticks when rotation crosses 5-degree increments
+                var lastTickedHeading by remember { mutableIntStateOf(0) }
+                val roundedHeading = headingDegrees.roundToInt()
+                LaunchedEffect(roundedHeading, pagerState.currentPage) {
+                    val pageIndex = Math.floorMod(pagerState.currentPage, 4)
+                    if (pageIndex == 2 && Math.abs(roundedHeading - lastTickedHeading) >= 5) {
+                        viewModel.hapticEngine.playSpeedMilestoneTick()
+                        lastTickedHeading = (roundedHeading / 5) * 5
+                    }
+                }
+
                 val configuration = LocalConfiguration.current
                 val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
 
@@ -467,18 +478,48 @@ fun MainScreen(
                                         }
                                     }
                                 } else {
-                                    // 4th Page: Speedometer fully utilized in landscape!
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
+                                    // 4th Page: Combined side-by-side view in landscape!
+                                    Row(
+                                        modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                                     ) {
-                                        SpeedometerDisplay(
-                                            animatedSpeed = animatedSpeed,
-                                            unitLabel = speedUnit.label,
-                                            styleIndex = activeSpeedometerIndex,
-                                            accentColor = uiAccent,
-                                            textColor = uiText
-                                        )
+                                        Box(
+                                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            SpeedometerDisplay(
+                                                animatedSpeed = animatedSpeed,
+                                                unitLabel = speedUnit.label,
+                                                styleIndex = activeSpeedometerIndex,
+                                                accentColor = uiAccent,
+                                                textColor = uiText
+                                            )
+                                        }
+                                        Box(
+                                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            if (!isBarometerAvailable) {
+                                                Text(
+                                                    text = "Barometer Unavailable",
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Light,
+                                                    color = uiText.copy(alpha = 0.5f)
+                                                )
+                                            } else {
+                                                AtmosphereDisplay(
+                                                    animatedAltitude = animatedAltitude,
+                                                    altitudeUnit = altitudeUnit,
+                                                    animatedPressure = animatedPressure,
+                                                    pressureUnit = pressureUnit,
+                                                    verticalSpeed = verticalSpeedMPS,
+                                                    styleIndex = activeAtmosphereIndex,
+                                                    accentColor = uiAccent,
+                                                    textColor = uiText
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }

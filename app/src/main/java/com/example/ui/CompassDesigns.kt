@@ -32,8 +32,20 @@ fun CompassDisplay(
     textColor: Color,
     modifier: Modifier = Modifier
 ) {
+    var targetAngle by remember { mutableStateOf(heading) }
+
+    LaunchedEffect(heading) {
+        val delta = (heading - targetAngle) % 360f
+        val shortestDelta = when {
+            delta > 180f -> delta - 360f
+            delta < -180f -> delta + 360f
+            else -> delta
+        }
+        targetAngle += shortestDelta
+    }
+
     val animatedHeading by animateFloatAsState(
-        targetValue = heading,
+        targetValue = targetAngle,
         animationSpec = spring(stiffness = Spring.StiffnessLow),
         label = "animatedHeading"
     )
