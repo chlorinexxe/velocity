@@ -133,7 +133,7 @@ val LightOnBg = Color(0xFF111111)
 val LightAccent = Color(0xFF007AFF)
 
 
-val OLED = Color(0xFF000000)
+val OledBg = Color(0xFF000000)
 val OledSurface = Color(0xFF0A0A0A)
 val OledPrimary = Color(0xFFFFFFFF)
 val OledOnBg = Color(0xFFFFFFFF)
