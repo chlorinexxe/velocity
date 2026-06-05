@@ -6,138 +6,165 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
 enum class AppTheme(val displayName: String) {
+
+    // 1. Dark
     SOPHISTICATED_DARK("Sophisticated Dark"),
+
+    // 2. Light
     LIGHT("Classic Light"),
+
+    // 3. Dark
     DARK("Space Dark"),
-    OLED("OLED Pure"),
-    TITANIUM("Raw Titanium"),
-    SAND("Sahara Sand"),
-    SLATE("Arctic Slate"),
-    CYBERPUNK("Cyberpunk Neon"),
-    RACING_GREEN("Racing Green"),
-    VOLCANIC_RED("Volcanic Lava"),
-    AURORA_BLUE("Aurora Blue"),
-    FOREST_NIGHT("Forest Night"),
-    PLUM_DARK("Plum Night"),
-    OCEAN_DEPTH("Ocean Depth"),
+
+    // 4. Light
     IVORY_CLOUD("Ivory Cloud"),
+
+    // 5. Dark
+    OLED("OLED Pure"),
+
+    // 6. Light
     WARM_PAPER("Warm Paper"),
+
+    // 7. Dark
+    TITANIUM("Raw Titanium"),
+
+    // 8. Light
     COOL_MIST("Cool Mist"),
-    }
+
+    // 9. Dark
+    SAND("Sahara Sand"),
+
+    // 10. Light
+    SLATE("Arctic Slate"),
+
+    // 11. Dark
+    CYBERPUNK("Cyberpunk Neon"),
+
+    // 12. Light
+    FOREST_NIGHT("Forest Night"),
+
+    // 13. Dark
+    RACING_GREEN("Racing Green"),
+
+    // 14. Light
+    AURORA_BLUE("Aurora Blue"),
+
+    // 15. Dark
+    VOLCANIC_RED("Volcanic Lava"),
+
+    // 16. Light
+    PLUM_DARK("Plum Night"),
+
+    // 17. Dark
+    OCEAN_DEPTH("Ocean Depth"),
+}
 
 object ThemeColors {
-    // 1. Classic Light
-    val LightBg = Color(0xFFF9F9FA)
-    val LightSurface = Color(0xFFFFFFFF)
-    val LightPrimary = Color(0xFF111111)
-    val LightOnBg = Color(0xFF111111)
-    val LightAccent = Color(0xFF007AFF)
+ val IvoryBg = Color(0xFFFAF8F5)
+val IvorySurface = Color(0xFFFFFFFF)
+val IvoryPrimary = Color(0xFF2A2A2C)
+val IvoryOnBg = Color(0xFF3A3A3C)
+val IvoryAccent = Color(0xFF6B7FD7) // soft indigo pastel
 
-    // 2. Space Dark
-    val DarkBg = Color(0xFF0D0E11)
-    val DarkSurface = Color(0xFF17181D)
-    val DarkPrimary = Color(0xFFE2E4E9)
-    val DarkOnBg = Color(0xFFF3F4F6)
-    val DarkAccent = Color(0xFF30D5C8) // turquoise
+val PaperBg = Color(0xFFF6F1E8)
+val PaperSurface = Color(0xFFFFFFFF)
+val PaperPrimary = Color(0xFF2F2A25)
+val PaperOnBg = Color(0xFF3D3731)
+val PaperAccent = Color(0xFFC49A6C) // soft beige gold
 
-    // 3. OLED Pure (100% black)
-    val OledBg = Color(0xFF000000)
-    val OledSurface = Color(0xFF0A0A0A)
-    val OledPrimary = Color(0xFFFFFFFF)
-    val OledOnBg = Color(0xFFFFFFFF)
-    val OledAccent = Color(0xFFFFCC00) // gold
+val MistBg = Color(0xFFF5F7FB)
+val MistSurface = Color(0xFFFFFFFF)
+val MistPrimary = Color(0xFF1F2937)
+val MistOnBg = Color(0xFF4B5563)
+val MistAccent = Color(0xFF7AA7FF) // soft sky blue
 
-    // 4. Raw Titanium (warm metallic look, Garmin/Apple Watch inspired)
-    val TitaniumBg = Color(0xFF222224)
-    val TitaniumSurface = Color(0xFF2C2D30)
-    val TitaniumPrimary = Color(0xFFF0F1F4)
-    val TitaniumOnBg = Color(0xFFF5F5FA)
-    val TitaniumAccent = Color(0xFFFF5200) // Action Orange
+val SlateBg = Color(0xFFEFF2F6)
+val SlateSurface = Color(0xFFFFFFFF)
+val SlatePrimary = Color(0xFF1F2933)
+val SlateOnBg = Color(0xFF2D3748)
+val SlateAccent = Color(0xFF7C8BA5) // muted steel blue
 
-    // 5. Sahara Sand (Warm, sophisticated organic)
-    val SandBg = Color(0xFFECE6DD)
-    val SandSurface = Color(0xFFF4EDE4)
-    val SandPrimary = Color(0xFF2B2621)
-    val SandOnBg = Color(0xFF3D362F)
-    val SandAccent = Color(0xFF8B5E3C) // Warm chocolate/bronze
+val ForestBg = Color(0xFFF3F7F5)
+val ForestSurface = Color(0xFFFFFFFF)
+val ForestPrimary = Color(0xFF22332B)
+val ForestOnBg = Color(0xFF2F463D)
+val ForestAccent = Color(0xFF6FCF97) // soft mint green
 
-    // 6. Arctic Slate (Stormy deep steel-blue)
-    val SlateBg = Color(0xFF1E2530)
-    val SlateSurface = Color(0xFF27303F)
-    val SlatePrimary = Color(0xFFE6EFFD)
-    val SlateOnBg = Color(0xFFF0F6FF)
-    val SlateAccent = Color(0xFF5EADFF) // Ice Blue
+val PlumBg = Color(0xFFF7F2FA)
+val PlumSurface = Color(0xFFFFFFFF)
+val PlumPrimary = Color(0xFF2B1F33)
+val PlumOnBg = Color(0xFF3A2A44)
+val PlumAccent = Color(0xFFC7A0FF) // lavender pastel
 
-    // 7. Sophisticated Dark (OLED Pure, Emerald high contrast details)
-    val SophisticatedDarkBg = Color(0xFF000000)
-    val SophisticatedDarkSurface = Color(0xFF111111)
-    val SophisticatedDarkPrimary = Color(0xFFFFFFFF)
-    val SophisticatedDarkOnBg = Color(0xFFFFFFFF)
-    val SophisticatedDarkAccent = Color(0xFF10B981) // Emerald accent for dynamic details
 
-    // 8. Cyberpunk Neon (Electric purple & neon magenta)
-    val CyberpunkBg = Color(0xFF0E0B25)
-    val CyberpunkSurface = Color(0xFF161238)
-    val CyberpunkPrimary = Color(0xFF00FFFF) // Cyan
-    val CyberpunkOnBg = Color(0xFFFFFFFF)
-    val CyberpunkAccent = Color(0xFFFF007F) // Neon Pink
+val DarkBg = Color(0xFF0D0E11)
+val DarkSurface = Color(0xFF17181D)
+val DarkPrimary = Color(0xFFE2E4E9)
+val DarkOnBg = Color(0xFFF3F4F6)
+val DarkAccent = Color(0xFF30D5C8)
 
-    // 9. Racing Green (Deep track green & golden yellow details)
-    val RacingGreenBg = Color(0xFF091611)
-    val RacingGreenSurface = Color(0xFF11261E)
-    val RacingGreenPrimary = Color(0xFFE5FFFA)
-    val RacingGreenOnBg = Color(0xFFF0FFF5)
-    val RacingGreenAccent = Color(0xFFFFD700) // Gold
+val SophisticatedDarkBg = Color(0xFF000000)
+val SophisticatedDarkSurface = Color(0xFF111111)
+val SophisticatedDarkPrimary = Color(0xFFFFFFFF)
+val SophisticatedDarkOnBg = Color(0xFFFFFFFF)
+val SophisticatedDarkAccent = Color(0xFF10B981)
 
-    // 10. Volcanic Lava (Obsidian dark & melting molten magma glow)
-    val VolcanicBg = Color(0xFF140F0F)
-    val VolcanicSurface = Color(0xFF221616)
-    val VolcanicPrimary = Color(0xFFFFFAFA)
-    val VolcanicOnBg = Color(0xFFFFFFFE)
-    val VolcanicAccent = Color(0xFFFF3B30) // Lava Red
+val TitaniumBg = Color(0xFF222224)
+val TitaniumSurface = Color(0xFF2C2D30)
+val TitaniumPrimary = Color(0xFFF0F1F4)
+val TitaniumOnBg = Color(0xFFF5F5FA)
+val TitaniumAccent = Color(0xFFFF6A3D) // refined orange
 
-    // 11. Aurora Blue (deep blue tinted dark)
-    val AuroraBg = Color(0xFF0B1220)
-    val AuroraSurface = Color(0xFF121C2E)
-    val AuroraPrimary = Color(0xFFE6F0FF)
-    val AuroraOnBg = Color(0xFFEAF2FF)
-    val AuroraAccent = Color(0xFF4DA3FF)
+val OceanBg = Color(0xFF071A1C)
+val OceanSurface = Color(0xFF0E2A2F)
+val OceanPrimary = Color(0xFFE6FFFC)
+val OceanOnBg = Color(0xFFEFFFFD)
+val OceanAccent = Color(0xFF2DE2E6)
 
-    val ForestBg = Color(0xFF0D1512)
-    val ForestSurface = Color(0xFF15211C)
-    val ForestPrimary = Color(0xFFE6FFF3)
-    val ForestOnBg = Color(0xFFEFFCF6)
-    val ForestAccent = Color(0xFF2EE59D)
+val AuroraBg = Color(0xFF0B1220)
+val AuroraSurface = Color(0xFF121C2E)
+val AuroraPrimary = Color(0xFFE6F0FF)
+val AuroraOnBg = Color(0xFFEAF2FF)
+val AuroraAccent = Color(0xFF4DA3FF)
 
-    val PlumBg = Color(0xFF140B18)
-    val PlumSurface = Color(0xFF1D1024)
-    val PlumPrimary = Color(0xFFF5E9FF)
-    val PlumOnBg = Color(0xFFF7EDFF)
-    val PlumAccent = Color(0xFFC77DFF)
+val LightBg = Color(0xFFF9F9FA)
+val LightSurface = Color(0xFFFFFFFF)
+val LightPrimary = Color(0xFF111111)
+val LightOnBg = Color(0xFF111111)
+val LightAccent = Color(0xFF007AFF)
 
-    val OceanBg = Color(0xFF071A1C)
-    val OceanSurface = Color(0xFF0E2A2F)
-    val OceanPrimary = Color(0xFFE6FFFC)
-    val OceanOnBg = Color(0xFFEFFFFD)
-    val OceanAccent = Color(0xFF3DE2C2)
 
-    val IvoryBg = Color(0xFFFAF8F5)
-    val IvorySurface = Color(0xFFFFFFFF)
-    val IvoryPrimary = Color(0xFF1C1C1E)
-    val IvoryOnBg = Color(0xFF2C2C2E)
-    val IvoryAccent = Color(0xFF5C6BC0)
+val OLED = Color(0xFF000000)
+val OledSurface = Color(0xFF0A0A0A)
+val OledPrimary = Color(0xFFFFFFFF)
+val OledOnBg = Color(0xFFFFFFFF)
+val OledAccent = Color(0xFFFFD700) // stronger gold contrast
 
-    val PaperBg = Color(0xFFF6F1E8)
-    val PaperSurface = Color(0xFFFFFFFF)
-    val PaperPrimary = Color(0xFF2D2A26)
-    val PaperOnBg = Color(0xFF3A352F)
-    val PaperAccent = Color(0xFFB08968)
+val CyberpunkBg = Color(0xFF0E0B25)
+val CyberpunkSurface = Color(0xFF161238)
+val CyberpunkPrimary = Color(0xFF00FFFF)
+val CyberpunkOnBg = Color(0xFFFFFFFF)
+val CyberpunkAccent = Color(0xFFFF2E9F) // hotter neon pink
 
-    val MistBg = Color(0xFFF5F7FB)
-    val MistSurface = Color(0xFFFFFFFF)
-    val MistPrimary = Color(0xFF1F2937)
-    val MistOnBg = Color(0xFF374151)
-    val MistAccent = Color(0xFF3B82F6)
+val RacingGreenBg = Color(0xFF091611)
+val RacingGreenSurface = Color(0xFF11261E)
+val RacingGreenPrimary = Color(0xFFE5FFFA)
+val RacingGreenOnBg = Color(0xFFF0FFF5)
+val RacingGreenAccent = Color(0xFFFFD700)
+
+val VolcanicBg = Color(0xFF140F0F)
+val VolcanicSurface = Color(0xFF221616)
+val VolcanicPrimary = Color(0xFFFFFAFA)
+val VolcanicOnBg = Color(0xFFFFFFFF)
+val VolcanicAccent = Color(0xFFFF3B30)
+
+val SandBg = Color(0xFFECE6DD)
+val SandSurface = Color(0xFFF4EDE4)
+val SandPrimary = Color(0xFF2B2621)
+val SandOnBg = Color(0xFF3D362F)
+val SandAccent = Color(0xFF8B5E3C)
+
+val SlateAccent = Color(0xFF5EADFF) // sharpened icy blue
 
 
 

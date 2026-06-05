@@ -218,13 +218,13 @@ class HapticEngine(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             playComposition(
                 listOf(
-                    VibrationEffect.Composition.PRIMITIVE_TICK to 0.4f,
-                    VibrationEffect.Composition.PRIMITIVE_CLICK to 0.95f
+                    VibrationEffect.Composition.PRIMITIVE_TICK to 0.4f,   // light micro tap
+                    VibrationEffect.Composition.PRIMITIVE_CLICK to 0.6f   // gentle confirmation
                 ),
-                fallback = { heavyClick() }
+                fallback = { click() }  // fallback to medium click for older devices
             )
         } else {
-            heavyClick()
+            click()  // keeps it soft on older versions
         }
     }
 
