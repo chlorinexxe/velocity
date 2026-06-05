@@ -60,6 +60,10 @@ fun MainScreen(
             ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         )
     }
@@ -70,9 +74,6 @@ fun MainScreen(
         val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
                       permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
         hasLocationPermission = granted
-        if (granted) {
-            viewModel.startAllTracking()
-        }
     }
 
     LaunchedEffect(hasLocationPermission) {
@@ -96,6 +97,7 @@ fun MainScreen(
     val speedUnit by viewModel.speedUnit.collectAsState()
     val pressureUnit by viewModel.pressureUnit.collectAsState()
     val altitudeUnit by viewModel.altitudeUnit.collectAsState()
+    val altitudeSource by viewModel.altitudeSource.collectAsState()
 
     val activeSpeedometerIndex by viewModel.activeSpeedometerIndex.collectAsState()
     val activeAtmosphereIndex by viewModel.activeAtmosphereIndex.collectAsState()
@@ -193,7 +195,8 @@ fun MainScreen(
                 var lastTickedSpeed by remember { mutableIntStateOf(0) }
                 val roundedSpeed = animatedSpeed.roundToInt()
                 LaunchedEffect(roundedSpeed, pagerState.currentPage) {
-                    if (pagerState.currentPage == 0 && currentSpeedMPS > 0.15f && roundedSpeed != lastTickedSpeed) {
+                    val pageIndex = Math.floorMod(pagerState.currentPage, 4)
+                    if (pageIndex == 0 && currentSpeedMPS > 0.15f && roundedSpeed != lastTickedSpeed) {
                         viewModel.hapticEngine.playSpeedMilestoneTick()
                         lastTickedSpeed = roundedSpeed
                     }
@@ -203,7 +206,8 @@ fun MainScreen(
                 var lastTickedAltitude by remember { mutableIntStateOf(0) }
                 val roundedAltitude = animatedAltitude.roundToInt()
                 LaunchedEffect(roundedAltitude, pagerState.currentPage) {
-                    if (pagerState.currentPage == 1 && isBarometerAvailable && roundedAltitude != lastTickedAltitude) {
+                    val pageIndex = Math.floorMod(pagerState.currentPage, 4)
+                    if (pageIndex == 1 && isBarometerAvailable && roundedAltitude != lastTickedAltitude) {
                         viewModel.hapticEngine.playSpeedMilestoneTick()
                         lastTickedAltitude = roundedAltitude
                     }
@@ -213,6 +217,7 @@ fun MainScreen(
                 val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
 
                 if (isLandscape) {
+                    val pageIndex = Math.floorMod(pagerState.currentPage, 4)
                     // --------------------------------------------------
                     // LANDSCAPE COCKPIT DASHBOARD LAYOUT
                     // --------------------------------------------------
@@ -462,48 +467,18 @@ fun MainScreen(
                                         }
                                     }
                                 } else {
-                                    // 4th Page: Combined side-by-side view in landscape!
-                                    Row(
-                                        modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                    // 4th Page: Speedometer fully utilized in landscape!
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
                                     ) {
-                                        Box(
-                                            modifier = Modifier.weight(1f).fillMaxHeight(),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            SpeedometerDisplay(
-                                                animatedSpeed = animatedSpeed,
-                                                unitLabel = speedUnit.label,
-                                                styleIndex = activeSpeedometerIndex,
-                                                accentColor = uiAccent,
-                                                textColor = uiText
-                                            )
-                                        }
-                                        Box(
-                                            modifier = Modifier.weight(1f).fillMaxHeight(),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            if (!isBarometerAvailable) {
-                                                Text(
-                                                    text = "Barometer Unavailable",
-                                                    fontSize = 12.sp,
-                                                    fontWeight = FontWeight.Light,
-                                                    color = uiText.copy(alpha = 0.5f)
-                                                )
-                                            } else {
-                                                AtmosphereDisplay(
-                                                    animatedAltitude = animatedAltitude,
-                                                    altitudeUnit = altitudeUnit,
-                                                    animatedPressure = animatedPressure,
-                                                    pressureUnit = pressureUnit,
-                                                    verticalSpeed = verticalSpeedMPS,
-                                                    styleIndex = activeAtmosphereIndex,
-                                                    accentColor = uiAccent,
-                                                    textColor = uiText
-                                                )
-                                            }
-                                        }
+                                        SpeedometerDisplay(
+                                            animatedSpeed = animatedSpeed,
+                                            unitLabel = speedUnit.label,
+                                            styleIndex = activeSpeedometerIndex,
+                                            accentColor = uiAccent,
+                                            textColor = uiText
+                                        )
                                     }
                                 }
                             }
@@ -516,14 +491,15 @@ fun MainScreen(
                                 .fillMaxHeight()
                                 .padding(vertical = 12.dp, horizontal = 12.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.SpaceBetween
+                            verticalArrangement = if (pageIndex == 3) Arrangement.Center else Arrangement.SpaceBetween
                         ) {
                             // 1. Double GPS Telemetry & Altitude Source Option (Barometer vs GPS)
-                            val altSource by viewModel.altitudeSource.collectAsState()
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
+                            if (pageIndex != 3) {
+                                val altSource = altitudeSource
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -582,16 +558,17 @@ fun MainScreen(
                                     )
                                 }
                             }
+                            }
 
                             // 2. Metric system indicator / selector badges
                             Box(
                                 modifier = Modifier.weight(1f),
                                 contentAlignment = Alignment.Center
                             ) {
-                                val pageIndex = Math.floorMod(pagerState.currentPage, 4)
-                                if (pageIndex == 0) {
-                                    var isSpeedLandSliding by remember { mutableStateOf(false) }
-                                    var speedLandDragAccumulator by remember { mutableStateOf(0f) }
+                                if (pageIndex != 3) {
+                                    if (pageIndex == 0) {
+                                        var isSpeedLandSliding by remember { mutableStateOf(false) }
+                                        var speedLandDragAccumulator by remember { mutableStateOf(0f) }
 
                                     Surface(
                                         modifier = Modifier
@@ -784,12 +761,13 @@ fun MainScreen(
                                         )
                                     }
                                 }
+                                }
                             }
 
                             // 3. Compact landscape footer (theme gear and page indicators)
                             Row(
                                 modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
+                                horizontalArrangement = if (pageIndex == 3) Arrangement.Center else Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 // Theme gear
@@ -814,8 +792,10 @@ fun MainScreen(
                                     )
                                 }
 
-                                // Carousel Dots
-                                MidCarouselDots(pageIndex = Math.floorMod(pagerState.currentPage, 4), uiText = uiText)
+                                if (pageIndex != 3) {
+                                    // Carousel Dots
+                                    MidCarouselDots(pageIndex = Math.floorMod(pagerState.currentPage, 4), uiText = uiText)
+                                }
                             }
                         }
                     }
@@ -826,6 +806,7 @@ fun MainScreen(
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
+                        val portraitPageIndex = Math.floorMod(pagerState.currentPage, 4)
                         // 1. PORTRAIT HEADER: Simulation controller and settings theme button
                         Row(
                             modifier = Modifier
@@ -835,39 +816,43 @@ fun MainScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // On the TOP LEFT, we put the altitude source toggle (GPS vs BARO)
-                            val optAltSource by viewModel.altitudeSource.collectAsState()
-                            Surface(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(32.dp))
-                                    .border(
-                                        0.5.dp,
-                                        if (optAltSource == AltitudeSource.GPS) uiAccent else uiText.copy(alpha = 0.08f),
-                                        RoundedCornerShape(32.dp)
-                                    )
-                                    .clickable {
-                                        val nextSource = if (optAltSource == AltitudeSource.BAROMETER) AltitudeSource.GPS else AltitudeSource.BAROMETER
-                                        viewModel.setAltitudeSource(nextSource)
-                                        viewModel.hapticEngine.click()
-                                    }
-                                    .testTag("altitude_source_toggle_portrait"),
-                                color = if (optAltSource == AltitudeSource.GPS) uiAccent.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surface.copy(alpha = 0.25f)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                            if (portraitPageIndex == 1 || portraitPageIndex == 3) {
+                                val optAltSource by viewModel.altitudeSource.collectAsState()
+                                Surface(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(32.dp))
+                                        .border(
+                                            0.5.dp,
+                                            if (optAltSource == AltitudeSource.GPS) uiAccent else uiText.copy(alpha = 0.08f),
+                                            RoundedCornerShape(32.dp)
+                                        )
+                                        .clickable {
+                                            val nextSource = if (optAltSource == AltitudeSource.BAROMETER) AltitudeSource.GPS else AltitudeSource.BAROMETER
+                                             viewModel.setAltitudeSource(nextSource)
+                                             viewModel.hapticEngine.click()
+                                        }
+                                        .testTag("altitude_source_toggle_portrait"),
+                                    color = if (optAltSource == AltitudeSource.GPS) uiAccent.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surface.copy(alpha = 0.25f)
                                 ) {
-                                    Canvas(modifier = Modifier.size(6.dp)) {
-                                        drawCircle(color = if (optAltSource == AltitudeSource.GPS) uiAccent else uiText.copy(alpha = 0.5f))
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                                    ) {
+                                        Canvas(modifier = Modifier.size(6.dp)) {
+                                            drawCircle(color = if (optAltSource == AltitudeSource.GPS) uiAccent else uiText.copy(alpha = 0.5f))
+                                        }
+                                        Text(
+                                            text = if (optAltSource == AltitudeSource.GPS) "GPS ALT" else "BARO ALT",
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (optAltSource == AltitudeSource.GPS) uiAccent else uiText.copy(alpha = 0.8f),
+                                            letterSpacing = 0.5.sp
+                                        )
                                     }
-                                    Text(
-                                        text = if (optAltSource == AltitudeSource.GPS) "GPS ALT" else "BARO ALT",
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (optAltSource == AltitudeSource.GPS) uiAccent else uiText.copy(alpha = 0.8f),
-                                        letterSpacing = 0.5.sp
-                                    )
                                 }
+                            } else {
+                                Spacer(modifier = Modifier.width(1.dp))
                             }
 
                             // Theme Selection Settings Gear

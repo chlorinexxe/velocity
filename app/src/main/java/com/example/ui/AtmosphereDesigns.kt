@@ -34,6 +34,8 @@ fun selectPressureProgress(pressure: Float): Float {
     return ((pressure - 200f) / 850f).coerceIn(0f, 1f)
 }
 
+val LocalShowPressure = staticCompositionLocalOf { true }
+
 @Composable
 fun AtmosphereDisplay(
     animatedAltitude: Float,
@@ -44,44 +46,47 @@ fun AtmosphereDisplay(
     styleIndex: Int,
     accentColor: Color,
     textColor: Color,
+    showPressure: Boolean = true,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        when (styleIndex) {
-            0 -> MinimalNumberStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
-            1 -> CircularPressureRing(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
-            2 -> VerticalAltitudeScale(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
-            3 -> PressureWaveStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
-            4 -> GradientHorizonStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
-            5 -> PrecisionGaugeStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
-            6 -> FloatingDigitsStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
-            7 -> DotMatrixStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
-            8 -> LineIndicatorStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
-            9 -> UltraMinimalStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
-            10 -> RetroGridTerrain(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            11 -> PressureThermal(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            12 -> DualConcentric(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            13 -> IsometricBlocks(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            14 -> AltitudeRuler(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            15 -> PressurePulse(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            16 -> LiquidColumn(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            17 -> AviationClassic(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            18 -> HorizonCurve(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            19 -> SandboxBubbles(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            20 -> ChronoAtmo(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            21 -> SpaceAscent(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            22 -> MinimalistArcDial(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            23 -> DigitalWind(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            24 -> SteampunkDial(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            25 -> HolographicAura(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            26 -> FlightDirector(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            27 -> HexagonalAtmo(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            28 -> SlinkyAltitude(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            29 -> SoundWaveAtmosphere(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
-            else -> MinimalNumberStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+    CompositionLocalProvider(LocalShowPressure provides showPressure) {
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            when (styleIndex) {
+                0 -> MinimalNumberStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+                1 -> CircularPressureRing(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+                2 -> VerticalAltitudeScale(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+                3 -> PressureWaveStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+                4 -> GradientHorizonStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+                5 -> PrecisionGaugeStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+                6 -> FloatingDigitsStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+                7 -> DotMatrixStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+                8 -> LineIndicatorStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+                9 -> UltraMinimalStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+                10 -> RetroGridTerrain(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                11 -> PressureThermal(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                12 -> DualConcentric(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                13 -> IsometricBlocks(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                14 -> AltitudeRuler(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                15 -> PressurePulse(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                16 -> LiquidColumn(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                17 -> AviationClassic(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                18 -> HorizonCurve(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                19 -> SandboxBubbles(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                20 -> ChronoAtmo(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                21 -> SpaceAscent(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                22 -> MinimalistArcDial(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                23 -> DigitalWind(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                24 -> SteampunkDial(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                25 -> HolographicAura(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                26 -> FlightDirector(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                27 -> HexagonalAtmo(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                28 -> SlinkyAltitude(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                29 -> SoundWaveAtmosphere(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+                else -> MinimalNumberStyle(animatedAltitude, altitudeUnit.label, animatedPressure, pressureUnit.label, verticalSpeed, accentColor, textColor)
+            }
         }
     }
 }
@@ -176,19 +181,21 @@ fun MinimalNumberStyle(
         )
         Spacer(modifier = Modifier.height(28.dp))
         VerticalSpeedIndicator(vSpeed, accent, textCol)
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            text = String.format("%.2f %s", press, pressUnit),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = textCol
-        )
-        Text(
-            text = "BAROMETRIC PRESSURE",
-            fontSize = 10.sp,
-            color = textCol.copy(alpha = 0.4f),
-            letterSpacing = 1.5.sp
-        )
+        if (LocalShowPressure.current) {
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = String.format("%.2f %s", press, pressUnit),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = textCol
+            )
+            Text(
+                text = "BAROMETRIC PRESSURE",
+                fontSize = 10.sp,
+                color = textCol.copy(alpha = 0.4f),
+                letterSpacing = 1.5.sp
+            )
+        }
     }
 }
 
@@ -824,7 +831,7 @@ fun UltraMinimalStyle(
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "${altUnit.lowercase()} | ${String.format("%.1f %s", press, pressUnit)}",
+                    text = if (LocalShowPressure.current) "${altUnit.lowercase()} | ${String.format("%.1f %s", press, pressUnit)}" else altUnit.lowercase(),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Light,
                     color = textCol.copy(alpha = 0.4f),
@@ -1833,12 +1840,14 @@ fun AtmosphereTextCentered(
             color = accent,
             letterSpacing = 1.sp
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = String.format("%.1f %s", pressure, pressureUnit.label),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            color = textCol.copy(alpha = 0.5f)
-        )
+        if (LocalShowPressure.current) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = String.format("%.1f %s", pressure, pressureUnit.label),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = textCol.copy(alpha = 0.5f)
+            )
+        }
     }
 }

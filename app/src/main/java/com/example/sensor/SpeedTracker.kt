@@ -77,7 +77,8 @@ class SpeedTracker(private val context: Context) {
 
         // 1. Priming Fused Location Client
         try {
-            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 100)
+            val priority = if (hasFine) Priority.PRIORITY_HIGH_ACCURACY else Priority.PRIORITY_BALANCED_POWER_ACCURACY
+            val locationRequest = LocationRequest.Builder(priority, 100)
                 .setMinUpdateIntervalMillis(50)
                 .setWaitForAccurateLocation(false) // Instant telemetry updates without blocking delay!
                 .build()
@@ -100,27 +101,31 @@ class SpeedTracker(private val context: Context) {
         }
 
         // 2. High-Precision Direct Hardware GPS Pipeline (Dual-Active tracking for maximum physical accuracy)
-        try {
-            fallbackListener = object : LocationListener {
-                override fun onLocationChanged(location: Location) {
-                    processNewLocation(location)
+        if (hasFine) {
+            try {
+                fallbackListener = object : LocationListener {
+                    override fun onLocationChanged(location: Location) {
+                        processNewLocation(location)
+                    }
+                    @Deprecated("Deprecated in API 29")
+                    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+                    override fun onProviderEnabled(provider: String) {}
+                    override fun onProviderDisabled(provider: String) {}
                 }
-                @Deprecated("Deprecated in API 29")
-                override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
-                override fun onProviderEnabled(provider: String) {}
-                override fun onProviderDisabled(provider: String) {}
-            }
 
-            locationManager?.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER,
-                100L, // 10 Hz physical hardware telemetry
-                0f,   // 0 meters displacement filter for infinite flow
-                fallbackListener!!,
-                Looper.getMainLooper()
-            )
-            Log.d("SpeedTracker", "Hardware GPS updates started concurrently.")
-        } catch (e: Exception) {
-            Log.e("SpeedTracker", "Failed starting direct hardware GPS updates", e)
+                locationManager?.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    100L, // 10 Hz physical hardware telemetry
+                    0f,   // 0 meters displacement filter for infinite flow
+                    fallbackListener!!,
+                    Looper.getMainLooper()
+                )
+                Log.d("SpeedTracker", "Hardware GPS updates started concurrently.")
+            } catch (e: Exception) {
+                Log.e("SpeedTracker", "Failed starting direct hardware GPS updates", e)
+            }
+        } else {
+            Log.d("SpeedTracker", "ACCESS_FINE_LOCATION premium telemetry not granted. Skipping concurrent direct Hardware GPS pipeline.")
         }
     }
 

@@ -43,44 +43,44 @@ fun CompassDisplay(
         contentAlignment = Alignment.Center
     ) {
         when (styleIndex) {
-            0 -> MinimalCard(animatedHeading, accentColor, textColor)
-            1 -> ClassicRose(animatedHeading, accentColor, textColor)
-            2 -> RadarSweeper(animatedHeading, accentColor, textColor)
-            3 -> RotatingRing(animatedHeading, accentColor, textColor)
-            4 -> ModernOled(animatedHeading, accentColor, textColor)
-            5 -> TacticalGps(animatedHeading, accentColor, textColor)
-            6 -> BubbleFloat(animatedHeading, accentColor, textColor)
-            7 -> HorizonTape(animatedHeading, accentColor, textColor)
-            8 -> FuturisticAero(animatedHeading, accentColor, textColor)
-            9 -> DotMatrixCompass(animatedHeading, accentColor, textColor)
-            10 -> GlassOrb(animatedHeading, accentColor, textColor)
-            11 -> SteampunkBrass(animatedHeading, accentColor, textColor)
-            12 -> SplitDial(animatedHeading, accentColor, textColor)
-            13 -> DigitalScope(animatedHeading, accentColor, textColor)
-            14 -> DualNeedleCompass(animatedHeading, accentColor, textColor)
-            15 -> PolyGlow(animatedHeading, accentColor, textColor)
-            16 -> CyberRing(animatedHeading, accentColor, textColor)
-            17 -> AbstractFocus(animatedHeading, accentColor, textColor)
-            18 -> LiquidOrbit(animatedHeading, accentColor, textColor)
-            19 -> Constellation(animatedHeading, accentColor, textColor)
-            20 -> SonicRadar(animatedHeading, accentColor, textColor)
-            21 -> HexaPulse(animatedHeading, accentColor, textColor)
-            22 -> RetroTape(animatedHeading, accentColor, textColor)
-            23 -> MinimalCross(animatedHeading, accentColor, textColor)
-            24 -> AuraCompass(animatedHeading, accentColor, textColor)
-            25 -> GridMap(animatedHeading, accentColor, textColor)
-            26 -> SolarSystem(animatedHeading, accentColor, textColor)
-            27 -> MatrixRainHeading(animatedHeading, accentColor, textColor)
-            28 -> SilhouetteHorizon(animatedHeading, accentColor, textColor)
-            29 -> TeslaCompass(animatedHeading, accentColor, textColor)
-            else -> MinimalCard(animatedHeading, accentColor, textColor)
+            0 -> MinimalCard(-animatedHeading, accentColor, textColor)
+            1 -> ClassicRose(-animatedHeading, accentColor, textColor)
+            2 -> RadarSweeper(-animatedHeading, accentColor, textColor)
+            3 -> RotatingRing(-animatedHeading, accentColor, textColor)
+            4 -> ModernOled(-animatedHeading, accentColor, textColor)
+            5 -> TacticalGps(-animatedHeading, accentColor, textColor)
+            6 -> BubbleFloat(-animatedHeading, accentColor, textColor)
+            7 -> HorizonTape(-animatedHeading, accentColor, textColor)
+            8 -> FuturisticAero(-animatedHeading, accentColor, textColor)
+            9 -> DotMatrixCompass(-animatedHeading, accentColor, textColor)
+            10 -> GlassOrb(-animatedHeading, accentColor, textColor)
+            11 -> SteampunkBrass(-animatedHeading, accentColor, textColor)
+            12 -> SplitDial(-animatedHeading, accentColor, textColor)
+            13 -> DigitalScope(-animatedHeading, accentColor, textColor)
+            14 -> DualNeedleCompass(-animatedHeading, accentColor, textColor)
+            15 -> PolyGlow(-animatedHeading, accentColor, textColor)
+            16 -> CyberRing(-animatedHeading, accentColor, textColor)
+            17 -> AbstractFocus(-animatedHeading, accentColor, textColor)
+            18 -> LiquidOrbit(-animatedHeading, accentColor, textColor)
+            19 -> Constellation(-animatedHeading, accentColor, textColor)
+            20 -> SonicRadar(-animatedHeading, accentColor, textColor)
+            21 -> HexaPulse(-animatedHeading, accentColor, textColor)
+            22 -> RetroTape(-animatedHeading, accentColor, textColor)
+            23 -> MinimalCross(-animatedHeading, accentColor, textColor)
+            24 -> AuraCompass(-animatedHeading, accentColor, textColor)
+            25 -> GridMap(-animatedHeading, accentColor, textColor)
+            26 -> SolarSystem(-animatedHeading, accentColor, textColor)
+            27 -> MatrixRainHeading(-animatedHeading, accentColor, textColor)
+            28 -> SilhouetteHorizon(-animatedHeading, accentColor, textColor)
+            29 -> TeslaCompass(-animatedHeading, accentColor, textColor)
+            else -> MinimalCard(-animatedHeading, accentColor, textColor)
         }
     }
 }
 
 @Composable
 fun CompassTextCentered(heading: Float, textColor: Color, accent: Color) {
-    val bearing = (heading + 360f) % 360f
+    val bearing = (-heading + 360f) % 360f
     val direction = when {
         bearing >= 337.5f || bearing < 22.5f -> "N"
         bearing >= 22.5f && bearing < 67.5f -> "NE"
@@ -341,7 +341,7 @@ fun HorizonTape(heading: Float, accentColor: Color, textColor: Color) {
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.padding(20.dp)
     ) {
-        val bearing = (heading + 360f) % 360f
+        val bearing = (-heading + 360f) % 360f
         Text(
             text = String.format("%03.0f°", bearing),
             fontSize = 44.sp,
@@ -680,7 +680,7 @@ fun AbstractFocus(heading: Float, accentColor: Color, textColor: Color) {
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.padding(24.dp)
     ) {
-        val bearing = (heading + 360f) % 360f
+        val bearing = (-heading + 360f) % 360f
         val verbose = when {
             bearing >= 337.5f || bearing < 22.5f -> "MAGNETIC NORTH"
             bearing >= 22.5f && bearing < 67.5f -> "NORTHEAST DIRECTION"

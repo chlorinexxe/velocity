@@ -70,31 +70,58 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val isTrackingSpeed: StateFlow<Boolean> = speedTracker.isTracking
     val isBarometerAvailable: StateFlow<Boolean> = atmosphereTracker.isBarometerAvailable
 
+    private val prefs = application.getSharedPreferences("velocity_settings", android.content.Context.MODE_PRIVATE)
+
+    private fun getAltitudeSourcePref(): AltitudeSource {
+        val saved = prefs.getString("altitude_source", null) ?: return AltitudeSource.BAROMETER
+        return try { AltitudeSource.valueOf(saved) } catch (e: Exception) { AltitudeSource.BAROMETER }
+    }
+
+    private fun getSpeedUnitPref(): SpeedUnit {
+        val saved = prefs.getString("speed_unit", null) ?: return SpeedUnit.KMH
+        return try { SpeedUnit.valueOf(saved) } catch (e: Exception) { SpeedUnit.KMH }
+    }
+
+    private fun getPressureUnitPref(): PressureUnit {
+        val saved = prefs.getString("pressure_unit", null) ?: return PressureUnit.HPA
+        return try { PressureUnit.valueOf(saved) } catch (e: Exception) { PressureUnit.HPA }
+    }
+
+    private fun getAltitudeUnitPref(): AltitudeUnit {
+        val saved = prefs.getString("altitude_unit", null) ?: return AltitudeUnit.METERS
+        return try { AltitudeUnit.valueOf(saved) } catch (e: Exception) { AltitudeUnit.METERS }
+    }
+
+    private fun getThemePref(): AppTheme {
+        val saved = prefs.getString("current_theme", null) ?: return AppTheme.SOPHISTICATED_DARK
+        return try { AppTheme.valueOf(saved) } catch (e: Exception) { AppTheme.SOPHISTICATED_DARK }
+    }
+
     // Selected Units
-    private val _altitudeSource = MutableStateFlow(AltitudeSource.BAROMETER)
+    private val _altitudeSource = MutableStateFlow(getAltitudeSourcePref())
     val altitudeSource: StateFlow<AltitudeSource> = _altitudeSource.asStateFlow()
 
-    private val _speedUnit = MutableStateFlow(SpeedUnit.KMH)
+    private val _speedUnit = MutableStateFlow(getSpeedUnitPref())
     val speedUnit: StateFlow<SpeedUnit> = _speedUnit.asStateFlow()
 
-    private val _pressureUnit = MutableStateFlow(PressureUnit.HPA)
+    private val _pressureUnit = MutableStateFlow(getPressureUnitPref())
     val pressureUnit: StateFlow<PressureUnit> = _pressureUnit.asStateFlow()
 
-    private val _altitudeUnit = MutableStateFlow(AltitudeUnit.METERS)
+    private val _altitudeUnit = MutableStateFlow(getAltitudeUnitPref())
     val altitudeUnit: StateFlow<AltitudeUnit> = _altitudeUnit.asStateFlow()
 
     // Style Selections
-    private val _activeSpeedometerIndex = MutableStateFlow(1) // 0..29 (30 styles)
+    private val _activeSpeedometerIndex = MutableStateFlow(prefs.getInt("active_speedometer_index", 1)) // 0..29 (30 styles)
     val activeSpeedometerIndex: StateFlow<Int> = _activeSpeedometerIndex.asStateFlow()
 
-    private val _activeAtmosphereIndex = MutableStateFlow(0) // 0..29 (30 styles)
+    private val _activeAtmosphereIndex = MutableStateFlow(prefs.getInt("active_atmosphere_index", 0)) // 0..29 (30 styles)
     val activeAtmosphereIndex: StateFlow<Int> = _activeAtmosphereIndex.asStateFlow()
 
-    private val _activeCompassIndex = MutableStateFlow(0) // 0..29 (30 styles)
+    private val _activeCompassIndex = MutableStateFlow(prefs.getInt("active_compass_index", 0)) // 0..29 (30 styles)
     val activeCompassIndex: StateFlow<Int> = _activeCompassIndex.asStateFlow()
 
     // Design Themes
-    private val _currentTheme = MutableStateFlow(AppTheme.SOPHISTICATED_DARK)
+    private val _currentTheme = MutableStateFlow(getThemePref())
     val currentTheme: StateFlow<AppTheme> = _currentTheme.asStateFlow()
 
     // Mode Overlays / Interactive states
@@ -169,6 +196,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun selectSpeedUnit(unit: SpeedUnit) {
         if (_speedUnit.value != unit) {
             _speedUnit.value = unit
+            prefs.edit().putString("speed_unit", unit.name).apply()
             hapticEngine.playUnitSelection()
         }
     }
@@ -176,6 +204,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun selectPressureUnit(unit: PressureUnit) {
         if (_pressureUnit.value != unit) {
             _pressureUnit.value = unit
+            prefs.edit().putString("pressure_unit", unit.name).apply()
             hapticEngine.playUnitSelection()
         }
     }
@@ -183,6 +212,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun selectAltitudeUnit(unit: AltitudeUnit) {
         if (_altitudeUnit.value != unit) {
             _altitudeUnit.value = unit
+            prefs.edit().putString("altitude_unit", unit.name).apply()
             hapticEngine.playUnitSelection()
         }
     }
@@ -190,6 +220,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun setAltitudeSource(source: AltitudeSource) {
         if (_altitudeSource.value != source) {
             _altitudeSource.value = source
+            prefs.edit().putString("altitude_source", source.name).apply()
             hapticEngine.playUnitSelection()
             _rawAltitudeMeters.value = if (source == AltitudeSource.BAROMETER) {
                 atmosphereTracker.estimatedAltitudeMeters.value
@@ -203,6 +234,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val bounded = index.coerceIn(0, 29)
         if (_activeSpeedometerIndex.value != bounded) {
             _activeSpeedometerIndex.value = bounded
+            prefs.edit().putInt("active_speedometer_index", bounded).apply()
             hapticEngine.heavyClick()
         }
     }
@@ -211,6 +243,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val bounded = index.coerceIn(0, 29)
         if (_activeSpeedometerIndex.value != bounded) {
             _activeSpeedometerIndex.value = bounded
+            prefs.edit().putInt("active_speedometer_index", bounded).apply()
             hapticEngine.tick()
         }
     }
@@ -219,6 +252,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val bounded = index.coerceIn(0, 29)
         if (_activeAtmosphereIndex.value != bounded) {
             _activeAtmosphereIndex.value = bounded
+            prefs.edit().putInt("active_atmosphere_index", bounded).apply()
             hapticEngine.heavyClick()
         }
     }
@@ -227,6 +261,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val bounded = index.coerceIn(0, 29)
         if (_activeAtmosphereIndex.value != bounded) {
             _activeAtmosphereIndex.value = bounded
+            prefs.edit().putInt("active_atmosphere_index", bounded).apply()
             hapticEngine.tick()
         }
     }
@@ -235,6 +270,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val bounded = index.coerceIn(0, 29)
         if (_activeCompassIndex.value != bounded) {
             _activeCompassIndex.value = bounded
+            prefs.edit().putInt("active_compass_index", bounded).apply()
             hapticEngine.heavyClick()
         }
     }
@@ -243,6 +279,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val bounded = index.coerceIn(0, 29)
         if (_activeCompassIndex.value != bounded) {
             _activeCompassIndex.value = bounded
+            prefs.edit().putInt("active_compass_index", bounded).apply()
             hapticEngine.tick()
         }
     }
@@ -264,6 +301,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun selectTheme(theme: AppTheme) {
         if (_currentTheme.value != theme) {
             _currentTheme.value = theme
+            prefs.edit().putString("current_theme", theme.name).apply()
             hapticEngine.playThemeChangeSuccess()
         }
     }
