@@ -51,6 +51,26 @@ fun AtmosphereDisplay(
             7 -> DotMatrixStyle(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
             8 -> LineIndicatorStyle(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
             9 -> UltraMinimalStyle(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            10 -> RetroGridTerrain(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            11 -> PressureThermal(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            12 -> DualConcentric(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            13 -> IsometricBlocks(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            14 -> AltitudeRuler(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            15 -> PressurePulse(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            16 -> LiquidColumn(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            17 -> AviationClassic(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            18 -> HorizonCurve(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            19 -> SandboxBubbles(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            20 -> ChronoAtmo(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            21 -> SpaceAscent(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            22 -> MinimalistArcDial(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            23 -> DigitalWind(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            24 -> SteampunkDial(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            25 -> HolographicAura(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            26 -> FlightDirector(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            27 -> HexagonalAtmo(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            28 -> SlinkyAltitude(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
+            29 -> SoundWaveAtmosphere(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
             else -> MinimalNumberStyle(animatedAltitude, altitudeUnit, animatedPressure, pressureUnit, verticalSpeed, accentColor, textColor)
         }
     }
@@ -857,4 +877,958 @@ private fun isDigitDotLit(x: Int, y: Int, digit: Int): Boolean {
         }
     }
     return false
+}
+
+@Composable
+fun RetroGridTerrain(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val w = size.width
+            val h = size.height
+            
+            val paths = 8
+            for (i in 0..paths) {
+                val ratio = i / paths.toFloat()
+                val xStart = w * ratio
+                drawLine(
+                    color = textColor.copy(alpha = 0.15f),
+                    start = Offset(xStart, h * 0.4f),
+                    end = Offset(w * 0.1f + xStart * 0.8f, h),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
+            
+            val steps = 4
+            for (j in 0..steps) {
+                val ratio = j / steps.toFloat()
+                val currY = h * 0.4f + (h * 0.6f) * ratio
+                val offsetH = (altitude % 100f) * 0.1f
+                drawLine(
+                    color = accentColor.copy(alpha = 0.25f),
+                    start = Offset(0f, currY - offsetH),
+                    end = Offset(w, currY - offsetH),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun PressureThermal(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val radius = size.minDimension / 2f - 30.dp.toPx()
+            
+            drawArc(
+                brush = Brush.sweepGradient(listOf(Color.Blue, accentColor, Color.Red)),
+                startAngle = 135f,
+                sweepAngle = 270f,
+                useCenter = false,
+                topLeft = Offset(center.x - radius, center.y - radius),
+                size = Size(radius * 2, radius * 2),
+                style = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round)
+            )
+            
+            val progress = ((pressure - 950f) / 100f).coerceIn(0f, 1f)
+            val angle = 135f + 270f * progress
+            val rad = Math.toRadians(angle.toDouble())
+            drawCircle(
+                color = textColor,
+                radius = 6.dp.toPx(),
+                center = Offset(
+                    (center.x + radius * cos(rad)).toFloat(),
+                    (center.y + radius * sin(rad)).toFloat()
+                )
+            )
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun DualConcentric(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val r1 = size.minDimension / 2f - 20.dp.toPx()
+            val r2 = size.minDimension / 2f - 40.dp.toPx()
+            
+            val altProgress = (altitude / 5000f).coerceIn(0f, 1f)
+            drawArc(
+                color = textColor.copy(alpha = 0.1f),
+                startAngle = -225f,
+                sweepAngle = 270f,
+                useCenter = false,
+                topLeft = Offset(center.x - r1, center.y - r1),
+                size = Size(r1 * 2, r1 * 2),
+                style = Stroke(width = 4.dp.toPx())
+            )
+            drawArc(
+                color = accentColor,
+                startAngle = -225f,
+                sweepAngle = 270f * altProgress,
+                useCenter = false,
+                topLeft = Offset(center.x - r1, center.y - r1),
+                size = Size(r1 * 2, r1 * 2),
+                style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
+            )
+            
+            val pressProgress = ((pressure - 950f) / 100f).coerceIn(0f, 1f)
+            drawArc(
+                color = textColor.copy(alpha = 0.1f),
+                startAngle = -45f,
+                sweepAngle = 270f,
+                useCenter = false,
+                topLeft = Offset(center.x - r2, center.y - r2),
+                size = Size(r2 * 2, r2 * 2),
+                style = Stroke(width = 4.dp.toPx())
+            )
+            drawArc(
+                color = textColor,
+                startAngle = -45f,
+                sweepAngle = 270f * pressProgress,
+                useCenter = false,
+                topLeft = Offset(center.x - r2, center.y - r2),
+                size = Size(r2 * 2, r2 * 2),
+                style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
+            )
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun IsometricBlocks(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val stepCount = 8
+            val progress = (altitude / 4000f).coerceIn(0f, 1f)
+            
+            for (i in 0 until stepCount) {
+                val heightRatio = (i + 1) / stepCount.toFloat()
+                val isLit = progress >= heightRatio
+                val blockH = 8.dp.toPx()
+                val blockW = 60.dp.toPx()
+                val col = if (isLit) accentColor else textColor.copy(alpha = 0.1f)
+                
+                val startY = center.y + 80.dp.toPx() - (i * 20.dp.toPx())
+                val drawPath = Path().apply {
+                    moveTo(center.x, startY)
+                    lineTo(center.x + blockW / 2f, startY + blockH / 2f)
+                    lineTo(center.x, startY + blockH)
+                    lineTo(center.x - blockW / 2f, startY + blockH / 2f)
+                    close()
+                }
+                drawPath(path = drawPath, color = col)
+            }
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun AltitudeRuler(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val w = size.width
+            val h = size.height
+            
+            val tapeW = 40.dp.toPx()
+            drawLine(
+                color = textColor.copy(alpha = 0.2f),
+                start = Offset(w - tapeW, 0f),
+                end = Offset(w - tapeW, h),
+                strokeWidth = 1.dp.toPx()
+            )
+            
+            val offsetInTape = (altitude % 100f) * (h / 300f)
+            for (i in -10..10) {
+                val tickAltitude = (altitude - (altitude % 100f)) + (i * 50f)
+                val tickY = center.y - (i * (h / 6f)) + offsetInTape
+                
+                if (tickY in 0f..h) {
+                    val tickLen = if (tickAltitude % 100 == 0f) 20.dp.toPx() else 10.dp.toPx()
+                    drawLine(
+                        color = if (tickAltitude % 100 == 0f) accentColor else textColor.copy(alpha = 0.4f),
+                        start = Offset(w - tapeW, tickY),
+                        end = Offset(w - tapeW + tickLen, tickY),
+                        strokeWidth = 2.dp.toPx()
+                    )
+                }
+            }
+            
+            val pointerPath = Path().apply {
+                moveTo(w - tapeW - 5.dp.toPx(), center.y)
+                lineTo(w - tapeW - 15.dp.toPx(), center.y - 10.dp.toPx())
+                lineTo(w - tapeW - 15.dp.toPx(), center.y + 10.dp.toPx())
+                close()
+            }
+            drawPath(path = pointerPath, color = accentColor)
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun PressurePulse(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "Pulse")
+    val pulseRatio by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "pulseRatio"
+    )
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val maxR = size.minDimension / 2f - 20.dp.toPx()
+            
+            val pulseRadius = maxR * pulseRatio
+            drawCircle(
+                color = accentColor.copy(alpha = 1f - pulseRatio),
+                radius = pulseRadius,
+                style = Stroke(width = 3.dp.toPx())
+            )
+            
+            drawCircle(
+                color = textColor.copy(alpha = 0.05f),
+                radius = maxR,
+                style = Stroke(width = 1.dp.toPx())
+            )
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun LiquidColumn(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val w = size.width
+            val h = size.height
+            val center = Offset(w / 2f, h / 2f)
+            
+            val tubeH = 180.dp.toPx()
+            val tubeW = 16.dp.toPx()
+            val startX = w * 0.15f
+            val startY = center.y - tubeH / 2f
+            
+            drawRoundRect(
+                color = textColor.copy(alpha = 0.15f),
+                topLeft = Offset(startX, startY),
+                size = Size(tubeW, tubeH),
+                cornerRadius = CornerRadius(8.dp.toPx()),
+                style = Stroke(width = 2.dp.toPx())
+            )
+            
+            val progress = ((pressure - 950f) / 100f).coerceIn(0f, 1f)
+            val fillHeight = tubeH * progress
+            drawRoundRect(
+                color = accentColor,
+                topLeft = Offset(startX + 2.dp.toPx(), startY + tubeH - fillHeight),
+                size = Size(tubeW - 4.dp.toPx(), fillHeight),
+                cornerRadius = CornerRadius(6.dp.toPx())
+            )
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun AviationClassic(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val radius = size.minDimension / 2f - 20.dp.toPx()
+            
+            drawCircle(color = textColor.copy(alpha = 0.15f), radius = radius, style = Stroke(width = 2.dp.toPx()))
+            
+            for (i in 0 until 10) {
+                val angle = i * 36f - 90f
+                val rad = Math.toRadians(angle.toDouble())
+                drawLine(
+                    color = accentColor,
+                    start = Offset(
+                        (center.x + (radius - 12.dp.toPx()) * cos(rad)).toFloat(),
+                        (center.y + (radius - 12.dp.toPx()) * sin(rad)).toFloat()
+                    ),
+                    end = Offset(
+                        (center.x + radius * cos(rad)).toFloat(),
+                        (center.y + radius * sin(rad)).toFloat()
+                    ),
+                    strokeWidth = 2.5.dp.toPx()
+                )
+            }
+            
+            val longAngle = -90f + (altitude % 1000f) * 0.36f
+            val medAngle = -90f + (altitude % 10000f) * 0.036f
+            val shortAngle = -90f + (altitude / 10000f).coerceIn(0f, 10f) * 36f
+            
+            val rLong = radius - 8.dp.toPx()
+            drawNeedleAt(center, longAngle, rLong, 1.5.dp.toPx(), textColor)
+            
+            val rMed = radius - 24.dp.toPx()
+            drawNeedleAt(center, medAngle, rMed, 3.5.dp.toPx(), accentColor)
+            
+            val rShort = radius - 44.dp.toPx()
+            drawNeedleAt(center, shortAngle, rShort, 5.dp.toPx(), textColor.copy(alpha = 0.6f))
+            
+            drawCircle(color = textColor, radius = 5.dp.toPx(), center = center)
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+private fun DrawScope.drawNeedleAt(center: Offset, angle: Float, length: Float, thickness: Float, color: Color) {
+    val rad = Math.toRadians(angle.toDouble())
+    drawLine(
+        color = color,
+        start = center,
+        end = Offset(
+            (center.x + length * cos(rad)).toFloat(),
+            (center.y + length * sin(rad)).toFloat()
+        ),
+        strokeWidth = thickness,
+        cap = StrokeCap.Round
+    )
+}
+
+@Composable
+fun HorizonCurve(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val w = size.width
+            val h = size.height
+            
+            val limit = (altitude / 8000f).coerceIn(0f, 1f)
+            val horizonY = center.y + 40.dp.toPx() + (60.dp.toPx() * limit)
+            
+            val curvePath = Path().apply {
+                moveTo(0f, h)
+                lineTo(0f, horizonY)
+                quadraticTo(center.x, horizonY - 20.dp.toPx(), w, horizonY)
+                lineTo(w, h)
+                close()
+            }
+            drawPath(
+                path = curvePath,
+                brush = Brush.verticalGradient(listOf(accentColor.copy(alpha = 0.4f), Color.Transparent))
+            )
+            drawPath(
+                path = curvePath,
+                color = accentColor,
+                style = Stroke(width = 2.dp.toPx())
+            )
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun SandboxBubbles(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "BubblesAnim")
+    val streamOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "streamOffset"
+    )
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val radius = size.minDimension / 2f - 25.dp.toPx()
+            
+            drawCircle(
+                color = textColor.copy(alpha = 0.05f),
+                radius = radius,
+                style = Stroke(width = 1.dp.toPx())
+            )
+            
+            val bubbleCount = 10
+            for (i in 0 until bubbleCount) {
+                val seed = i * 149f
+                val angle = (seed % 360f)
+                val rad = Math.toRadians(angle.toDouble())
+                
+                val flowOffset = (streamOffset + seed) % radius
+                val finalR = radius - flowOffset
+                
+                val pX = center.x + finalR * cos(rad).toFloat()
+                val pY = center.y + finalR * sin(rad).toFloat()
+                
+                drawCircle(
+                    color = accentColor.copy(alpha = 1f - (flowOffset / radius)),
+                    radius = (2.dp.toPx() + (i % 3).dp.toPx()),
+                    center = Offset(pX, pY)
+                )
+            }
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun ChronoAtmo(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val radius = size.minDimension / 2f - 20.dp.toPx()
+            
+            drawCircle(
+                color = textColor.copy(alpha = 0.1f),
+                radius = radius,
+                style = Stroke(width = 1.dp.toPx())
+            )
+            
+            for (i in 0 until 36) {
+                val angle = i * 10f
+                val rad = Math.toRadians(angle.toDouble())
+                val isMajor = i % 9 == 0
+                val tickLen = if (isMajor) 15.dp.toPx() else 6.dp.toPx()
+                drawLine(
+                    color = if (isMajor) accentColor else textColor.copy(alpha = 0.25f),
+                    start = Offset(
+                        (center.x + (radius - tickLen) * cos(rad)).toFloat(),
+                        (center.y + (radius - tickLen) * sin(rad)).toFloat()
+                    ),
+                    end = Offset(
+                        (center.x + radius * cos(rad)).toFloat(),
+                        (center.y + radius * sin(rad)).toFloat()
+                    ),
+                    strokeWidth = if (isMajor) 2.dp.toPx() else 1.dp.toPx()
+                )
+            }
+            
+            val progress = ((pressure - 950f) / 100f).coerceIn(0f, 1f)
+            val sweepAngle = -90f + progress * 360f
+            val radSweep = Math.toRadians(sweepAngle.toDouble())
+            drawLine(
+                color = accentColor,
+                start = center,
+                end = Offset(
+                    (center.x + (radius - 12.dp.toPx()) * cos(radSweep)).toFloat(),
+                    (center.y + (radius - 12.dp.toPx()) * sin(radSweep)).toFloat()
+                ),
+                strokeWidth = 3.dp.toPx(),
+                cap = StrokeCap.Round
+            )
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun SpaceAscent(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(24.dp)
+    ) {
+        val label = when {
+            altitude < 1000f -> "TROPOSPHERE"
+            altitude < 10000f -> "STRATOSPHERE"
+            else -> "MESOSPHERE"
+        }
+        Text(
+            text = label,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = accentColor,
+            letterSpacing = 4.sp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = String.format("%.0f", altitude),
+            fontSize = 68.sp,
+            fontWeight = FontWeight.Black,
+            color = textColor
+        )
+        Text(
+            text = altitudeUnit.label.uppercase(),
+            fontSize = 11.sp,
+            color = textColor.copy(alpha = 0.4f),
+            letterSpacing = 1.sp
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.Center) {
+            for (dot in 0 until 5) {
+                val limit = (dot + 1) / 5f
+                val active = (altitude / 12000f) >= limit
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .padding(horizontal = 2.dp)
+                        .background(
+                            color = if (active) accentColor else textColor.copy(alpha = 0.1f),
+                            shape = CircleShape
+                        )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun MinimalistArcDial(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val radius = size.minDimension / 2f - 30.dp.toPx()
+            
+            val altProgress = (altitude / 5000f).coerceIn(0f, 1f)
+            drawArc(
+                color = textColor.copy(alpha = 0.1f),
+                startAngle = 120f,
+                sweepAngle = 120f,
+                useCenter = false,
+                topLeft = Offset(center.x - radius, center.y - radius),
+                size = Size(radius * 2, radius * 2),
+                style = Stroke(width = 6.dp.toPx(), cap = StrokeCap.Round)
+            )
+            drawArc(
+                color = accentColor,
+                startAngle = 120f,
+                sweepAngle = 120f * altProgress,
+                useCenter = false,
+                topLeft = Offset(center.x - radius, center.y - radius),
+                size = Size(radius * 2, radius * 2),
+                style = Stroke(width = 6.dp.toPx(), cap = StrokeCap.Round)
+            )
+            
+            val pressProgress = ((pressure - 950f) / 100f).coerceIn(0f, 1f)
+            drawArc(
+                color = textColor.copy(alpha = 0.1f),
+                startAngle = -60f,
+                sweepAngle = 120f,
+                useCenter = false,
+                topLeft = Offset(center.x - radius, center.y - radius),
+                size = Size(radius * 2, radius * 2),
+                style = Stroke(width = 6.dp.toPx(), cap = StrokeCap.Round)
+            )
+            drawArc(
+                color = textColor.copy(alpha = 0.8f),
+                startAngle = -60f,
+                sweepAngle = 120f * pressProgress,
+                useCenter = false,
+                topLeft = Offset(center.x - radius, center.y - radius),
+                size = Size(radius * 2, radius * 2),
+                style = Stroke(width = 6.dp.toPx(), cap = StrokeCap.Round)
+            )
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun DigitalWind(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "WindAnim")
+    val shiftX by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 280.dp.value,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shiftX"
+    )
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val h = size.height
+            val w = size.width
+            val progress = (verticalSpeed / 10f).coerceIn(-1f, 1f)
+            
+            val rowCount = 6
+            for (row in 0 until rowCount) {
+                val rowY = h * 0.15f + (row * (h * 0.7f / rowCount))
+                val colShift = (row * 89f) % w
+                val finalX = (colShift + shiftX * (if (progress >= 0) 1f else -1f)) % w
+                
+                drawLine(
+                    color = accentColor.copy(alpha = 0.2f),
+                    start = Offset(finalX, rowY),
+                    end = Offset(finalX + 30.dp.toPx(), rowY),
+                    strokeWidth = 1.5.dp.toPx()
+                )
+            }
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun SteampunkDial(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val radius = size.minDimension / 2f - 30.dp.toPx()
+            
+            drawCircle(
+                color = accentColor.copy(alpha = 0.4f),
+                radius = radius,
+                style = Stroke(width = 4.dp.toPx())
+            )
+            
+            for (i in 0 until 24) {
+                val angle = i * 15f
+                val rad = Math.toRadians(angle.toDouble())
+                drawCircle(
+                    color = accentColor,
+                    radius = 3.dp.toPx(),
+                    center = Offset(
+                        (center.x + (radius - 10.dp.toPx()) * cos(rad)).toFloat(),
+                        (center.y + (radius - 10.dp.toPx()) * sin(rad)).toFloat()
+                    )
+                )
+            }
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun HolographicAura(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val progress = (altitude / 12000f).coerceIn(0f, 1f)
+            
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(accentColor.copy(alpha = 0.35f * progress), Color.Transparent),
+                    center = center,
+                    radius = size.minDimension / 2f
+                ),
+                radius = size.minDimension / 2f
+            )
+            
+            drawCircle(
+                color = textColor.copy(alpha = 0.08f),
+                radius = size.minDimension / 2f - 20.dp.toPx(),
+                style = Stroke(width = 1.5.dp.toPx())
+            )
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun FlightDirector(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val radius = size.minDimension / 2f - 20.dp.toPx()
+            
+            drawLine(
+                color = textColor.copy(alpha = 0.15f),
+                start = Offset(center.x - radius, center.y),
+                end = Offset(center.x + radius, center.y),
+                strokeWidth = 1.5.dp.toPx()
+            )
+            
+            val flightPitchOffset = (verticalSpeed * 5f).coerceIn(-40f, 40f).dp.toPx()
+            val noseY = center.y - flightPitchOffset
+            
+            val wingsPath = Path().apply {
+                moveTo(center.x - 40.dp.toPx(), noseY)
+                lineTo(center.x - 15.dp.toPx(), noseY)
+                lineTo(center.x, noseY - 12.dp.toPx())
+                lineTo(center.x + 15.dp.toPx(), noseY)
+                lineTo(center.x + 40.dp.toPx(), noseY)
+            }
+            drawPath(
+                path = wingsPath,
+                color = accentColor,
+                style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
+            )
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun HexagonalAtmo(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val radius = size.minDimension / 2f - 30.dp.toPx()
+            
+            for (step in 1..3) {
+                val hexRadius = radius * (step / 3f)
+                val hexPath = Path()
+                for (side in 0..5) {
+                    val angle = side * 60f + 30f
+                    val rad = Math.toRadians(angle.toDouble())
+                    val pX = center.x + hexRadius * cos(rad).toFloat()
+                    val pY = center.y + hexRadius * sin(rad).toFloat()
+                    if (side == 0) hexPath.moveTo(pX, pY) else hexPath.lineTo(pX, pY)
+                }
+                hexPath.close()
+                drawPath(
+                    path = hexPath,
+                    color = if (step == 3) accentColor else textColor.copy(alpha = 0.08f),
+                    style = Stroke(width = 1.5.dp.toPx())
+                )
+            }
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun SlinkyAltitude(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val limit = (altitude / 8000f).coerceIn(0f, 1f)
+            
+            val circleCount = 6
+            for (c in 0 until circleCount) {
+                val factor = (c + 1) / circleCount.toFloat()
+                val currentR = 40.dp.toPx() + (80.dp.toPx() * factor * limit)
+                drawCircle(
+                    color = accentColor.copy(alpha = 1f - factor * 0.7f),
+                    radius = currentR,
+                    style = Stroke(width = 1.5.dp.toPx())
+                )
+            }
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun SoundWaveAtmosphere(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    verticalSpeed: Float,
+    accentColor: Color,
+    textColor: Color
+) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val w = size.width
+            val h = size.height
+            
+            val barCount = 14
+            val spacing = 4.dp.toPx()
+            val totalW = (barCount * 10.dp.toPx()) + ((barCount - 1) * spacing)
+            val startX = center.x - totalW / 2f
+            
+            for (col in 0 until barCount) {
+                val ratio = col / barCount.toFloat()
+                val signalHeight = 20.dp.toPx() + ((pressure - 950f) * 0.4f * sin(ratio * Math.PI).toFloat())
+                val pX = startX + col * (10.dp.toPx() + spacing)
+                
+                drawLine(
+                    color = accentColor,
+                    start = Offset(pX, center.y - signalHeight / 2f),
+                    end = Offset(pX, center.y + signalHeight / 2f),
+                    strokeWidth = 4.dp.toPx(),
+                    cap = StrokeCap.Round
+                )
+            }
+        }
+        AtmosphereTextCentered(altitude, altitudeUnit, pressure, pressureUnit, textColor, accentColor)
+    }
+}
+
+@Composable
+fun AtmosphereTextCentered(
+    altitude: Float,
+    altitudeUnit: AltitudeUnit,
+    pressure: Float,
+    pressureUnit: PressureUnit,
+    textCol: Color,
+    accent: Color
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = String.format("%.0f", altitude),
+            fontSize = 52.sp,
+            fontWeight = FontWeight.Bold,
+            color = textCol
+        )
+        Text(
+            text = altitudeUnit.label.uppercase(),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = accent,
+            letterSpacing = 1.sp
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = String.format("%.1f %s", pressure, pressureUnit.label),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            color = textCol.copy(alpha = 0.5f)
+        )
+    }
 }

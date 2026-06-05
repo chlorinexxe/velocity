@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.haptic.HapticEngine
 import com.example.sensor.AtmosphereTracker
+import com.example.sensor.CompassTracker
 import com.example.sensor.SpeedTracker
 import com.example.theme.AppTheme
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +37,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val speedTracker = SpeedTracker(application)
     private val atmosphereTracker = AtmosphereTracker(application)
+    val compassTracker = CompassTracker(application)
     val hapticEngine = HapticEngine(application)
 
     // Simulation Engine Controls
@@ -57,6 +59,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _verticalSpeedMPS = MutableStateFlow(0f)
     val verticalSpeedMPS: StateFlow<Float> = _verticalSpeedMPS.asStateFlow()
 
+    private val _headingDegrees = MutableStateFlow(0f)
+    val headingDegrees: StateFlow<Float> = _headingDegrees.asStateFlow()
+
     val isTrackingSpeed: StateFlow<Boolean> = speedTracker.isTracking
     val isBarometerAvailable: StateFlow<Boolean> = atmosphereTracker.isBarometerAvailable
 
@@ -71,11 +76,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val altitudeUnit: StateFlow<AltitudeUnit> = _altitudeUnit.asStateFlow()
 
     // Style Selections
-    private val _activeSpeedometerIndex = MutableStateFlow(1) // 0..19 (20 styles)
+    private val _activeSpeedometerIndex = MutableStateFlow(1) // 0..29 (30 styles)
     val activeSpeedometerIndex: StateFlow<Int> = _activeSpeedometerIndex.asStateFlow()
 
-    private val _activeAtmosphereIndex = MutableStateFlow(0) // 0..9 (10 styles)
+    private val _activeAtmosphereIndex = MutableStateFlow(0) // 0..29 (30 styles)
     val activeAtmosphereIndex: StateFlow<Int> = _activeAtmosphereIndex.asStateFlow()
+
+    private val _activeCompassIndex = MutableStateFlow(0) // 0..29 (30 styles)
+    val activeCompassIndex: StateFlow<Int> = _activeCompassIndex.asStateFlow()
 
     // Design Themes
     private val _currentTheme = MutableStateFlow(AppTheme.SOPHISTICATED_DARK)
@@ -87,6 +95,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _isAtmospherePreviewActive = MutableStateFlow(false)
     val isAtmospherePreviewActive: StateFlow<Boolean> = _isAtmospherePreviewActive.asStateFlow()
+
+    private val _isCompassPreviewActive = MutableStateFlow(false)
+    val isCompassPreviewActive: StateFlow<Boolean> = _isCompassPreviewActive.asStateFlow()
 
     private val _isThemeSelectionActive = MutableStateFlow(false)
     val isThemeSelectionActive: StateFlow<Boolean> = _isThemeSelectionActive.asStateFlow()
@@ -118,16 +129,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 _verticalSpeedMPS.value = vs
             }
         }
+        viewModelScope.launch {
+            compassTracker.headingDegrees.collect { hd ->
+                _headingDegrees.value = hd
+            }
+        }
     }
 
     fun startAllTracking() {
         speedTracker.startTracking()
         atmosphereTracker.startTracking()
+        compassTracker.startTracking()
     }
 
     fun stopAllTracking() {
         speedTracker.stopTracking()
         atmosphereTracker.stopTracking()
+        compassTracker.stopTracking()
     }
 
     // Interactive selections
@@ -153,7 +171,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun setSpeedometerStyle(index: Int) {
-        val bounded = index.coerceIn(0, 19)
+        val bounded = index.coerceIn(0, 29)
         if (_activeSpeedometerIndex.value != bounded) {
             _activeSpeedometerIndex.value = bounded
             hapticEngine.heavyClick()
@@ -161,7 +179,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun previewSpeedometerStyle(index: Int) {
-        val bounded = index.coerceIn(0, 19)
+        val bounded = index.coerceIn(0, 29)
         if (_activeSpeedometerIndex.value != bounded) {
             _activeSpeedometerIndex.value = bounded
             hapticEngine.tick()
@@ -169,7 +187,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun setAtmosphereStyle(index: Int) {
-        val bounded = index.coerceIn(0, 9)
+        val bounded = index.coerceIn(0, 29)
         if (_activeAtmosphereIndex.value != bounded) {
             _activeAtmosphereIndex.value = bounded
             hapticEngine.heavyClick()
@@ -177,10 +195,33 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun previewAtmosphereStyle(index: Int) {
-        val bounded = index.coerceIn(0, 9)
+        val bounded = index.coerceIn(0, 29)
         if (_activeAtmosphereIndex.value != bounded) {
             _activeAtmosphereIndex.value = bounded
             hapticEngine.tick()
+        }
+    }
+
+    fun setCompassStyle(index: Int) {
+        val bounded = index.coerceIn(0, 29)
+        if (_activeCompassIndex.value != bounded) {
+            _activeCompassIndex.value = bounded
+            hapticEngine.heavyClick()
+        }
+    }
+
+    fun previewCompassStyle(index: Int) {
+        val bounded = index.coerceIn(0, 29)
+        if (_activeCompassIndex.value != bounded) {
+            _activeCompassIndex.value = bounded
+            hapticEngine.tick()
+        }
+    }
+
+    fun setCompassPreviewActive(active: Boolean) {
+        if (_isCompassPreviewActive.value != active) {
+            _isCompassPreviewActive.value = active
+            if (active) hapticEngine.doubleClick() else hapticEngine.click()
         }
     }
 

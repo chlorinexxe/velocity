@@ -99,16 +99,21 @@ fun MainScreen(
 
     val activeSpeedometerIndex by viewModel.activeSpeedometerIndex.collectAsState()
     val activeAtmosphereIndex by viewModel.activeAtmosphereIndex.collectAsState()
+    val activeCompassIndex by viewModel.activeCompassIndex.collectAsState()
 
     val currentSpeedometerIndexState by rememberUpdatedState(activeSpeedometerIndex)
     val currentAtmosphereIndexState by rememberUpdatedState(activeAtmosphereIndex)
+    val currentCompassIndexState by rememberUpdatedState(activeCompassIndex)
     val currentSpeedUnitState by rememberUpdatedState(speedUnit)
     val currentPressureUnitState by rememberUpdatedState(pressureUnit)
     val currentAltitudeUnitState by rememberUpdatedState(altitudeUnit)
 
     val isSpeedPreviewActive by viewModel.isSpeedPreviewActive.collectAsState()
     val isAtmospherePreviewActive by viewModel.isAtmospherePreviewActive.collectAsState()
+    val isCompassPreviewActive by viewModel.isCompassPreviewActive.collectAsState()
     val isThemeSelectionActive by viewModel.isThemeSelectionActive.collectAsState()
+
+    val headingDegrees by viewModel.headingDegrees.collectAsState()
 
     // Smooth springing values for gorgeous kinetic dials
     val animatedSpeed by animateFloatAsState(
@@ -171,7 +176,7 @@ fun MainScreen(
                     )
                 })
             } else {
-                val pagerState = rememberPagerState(initialPage = 0, pageCount = { 2 })
+                val pagerState = rememberPagerState(initialPage = 0, pageCount = { 3 })
                 val isSimulating by viewModel.isSimulating.collectAsState()
 
                 // Premium haptics: PageSwipe transition feedback
@@ -300,7 +305,7 @@ fun MainScreen(
                                             }
                                         }
                                     }
-                                } else {
+                                } else if (page == 1) {
                                     // Atmosphere page dial
                                     Box(
                                         modifier = Modifier
@@ -326,12 +331,12 @@ fun MainScreen(
                                                         dragAccumulator += dragAmount.x
                                                         val threshold = 70f
                                                         if (dragAccumulator > threshold) {
-                                                            currentTempIndex = (currentTempIndex - 1 + 10) % 10
+                                                            currentTempIndex = (currentTempIndex - 1 + 30) % 30
                                                             viewModel.previewAtmosphereStyle(currentTempIndex)
                                                             viewModel.hapticEngine.playAtmosphereStyleSlide()
                                                             dragAccumulator = 0f
                                                         } else if (dragAccumulator < -threshold) {
-                                                            currentTempIndex = (currentTempIndex + 1) % 10
+                                                            currentTempIndex = (currentTempIndex + 1) % 30
                                                             viewModel.previewAtmosphereStyle(currentTempIndex)
                                                             viewModel.hapticEngine.playAtmosphereStyleSlide()
                                                             dragAccumulator = 0f
@@ -374,7 +379,78 @@ fun MainScreen(
                                                     .align(Alignment.TopCenter)
                                             ) {
                                                 Text(
-                                                    text = "STYLE: ${activeAtmosphereIndex + 1} / 10",
+                                                    text = "STYLE: ${activeAtmosphereIndex + 1} / 30",
+                                                    color = Color.White,
+                                                    fontSize = 10.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                                    letterSpacing = 1.sp
+                                                )
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    // Compass page dial
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .pointerInput(Unit) {
+                                                var dragAccumulator = 0f
+                                                var currentTempIndex = activeCompassIndex
+
+                                                detectDragGesturesAfterLongPress(
+                                                    onDragStart = {
+                                                        viewModel.setCompassPreviewActive(true)
+                                                        dragAccumulator = 0f
+                                                        currentTempIndex = currentCompassIndexState
+                                                        viewModel.hapticEngine.heavyClick()
+                                                    },
+                                                    onDragEnd = {
+                                                        viewModel.setCompassPreviewActive(false)
+                                                    },
+                                                    onDragCancel = {
+                                                        viewModel.setCompassPreviewActive(false)
+                                                    },
+                                                    onDrag = { _, dragAmount ->
+                                                        dragAccumulator += dragAmount.x
+                                                        val threshold = 70f
+                                                        if (dragAccumulator > threshold) {
+                                                            currentTempIndex = (currentTempIndex - 1 + 30) % 30
+                                                            viewModel.previewCompassStyle(currentTempIndex)
+                                                            viewModel.hapticEngine.playAtmosphereStyleSlide()
+                                                            dragAccumulator = 0f
+                                                        } else if (dragAccumulator < -threshold) {
+                                                            currentTempIndex = (currentTempIndex + 1) % 30
+                                                            viewModel.previewCompassStyle(currentTempIndex)
+                                                            viewModel.hapticEngine.playAtmosphereStyleSlide()
+                                                            dragAccumulator = 0f
+                                                        }
+                                                    }
+                                                )
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CompassDisplay(
+                                            heading = headingDegrees,
+                                            styleIndex = activeCompassIndex,
+                                            accentColor = uiAccent,
+                                            textColor = uiText
+                                        )
+
+                                        // Style selection overlay banner in landscape
+                                        androidx.compose.animation.AnimatedVisibility(
+                                            visible = isCompassPreviewActive,
+                                            enter = fadeIn(animationSpec = tween(150)) + scaleIn(initialScale = 0.9f),
+                                            exit = fadeOut(animationSpec = tween(150)) + scaleOut()
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .padding(top = 10.dp)
+                                                    .background(uiAccent.copy(alpha = 0.85f), RoundedCornerShape(12.dp))
+                                                    .align(Alignment.TopCenter)
+                                            ) {
+                                                Text(
+                                                    text = "COMPASS: ${activeCompassIndex + 1} / 30",
                                                     color = Color.White,
                                                     fontSize = 10.sp,
                                                     fontWeight = FontWeight.Bold,
@@ -639,30 +715,7 @@ fun MainScreen(
                                 }
 
                                 // Carousel Dots
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    for (i in 0 until 2) {
-                                        val isActive = pagerState.currentPage == i
-                                        val dotColor by animateColorAsState(
-                                            targetValue = if (isActive) uiText else uiText.copy(alpha = 0.15f),
-                                            label = "dotColor"
-                                        )
-                                        val dotWidth by animateDpAsState(
-                                            targetValue = if (isActive) 16.dp else 4.dp,
-                                            animationSpec = spring(stiffness = Spring.StiffnessMedium),
-                                            label = "dotWidth"
-                                        )
-
-                                        Box(
-                                            modifier = Modifier
-                                                .size(width = dotWidth, height = 4.dp)
-                                                .clip(RoundedCornerShape(2.dp))
-                                                .background(dotColor)
-                                        )
-                                    }
-                                }
+                                MidCarouselDots(isActive0 = pagerState.currentPage == 0, isActive1 = pagerState.currentPage == 1, isActive2 = pagerState.currentPage == 2, uiText = uiText)
                             }
                         }
                     }

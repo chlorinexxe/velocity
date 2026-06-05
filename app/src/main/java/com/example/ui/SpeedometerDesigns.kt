@@ -61,6 +61,16 @@ fun SpeedometerDisplay(
             17 -> FocusMode(animatedSpeed, unitLabel, accentColor, textColor)
             18 -> AdaptiveGauge(animatedSpeed, unitLabel, accentColor, textColor)
             19 -> UltraMinimal(animatedSpeed, unitLabel, accentColor, textColor)
+            20 -> CyberpunkNeon(animatedSpeed, unitLabel, accentColor, textColor)
+            21 -> Chronograph(animatedSpeed, unitLabel, accentColor, textColor)
+            22 -> BarChartHorizontal(animatedSpeed, unitLabel, accentColor, textColor)
+            23 -> DoubleNeedle(animatedSpeed, unitLabel, accentColor, textColor)
+            24 -> SectorRadar(animatedSpeed, unitLabel, accentColor, textColor)
+            25 -> RetroLedSegment(animatedSpeed, unitLabel, accentColor, textColor)
+            26 -> FuturisticRibbon(animatedSpeed, unitLabel, accentColor, textColor)
+            27 -> LiquidCore(animatedSpeed, unitLabel, accentColor, textColor)
+            28 -> TypographyFocus(animatedSpeed, unitLabel, accentColor, textColor)
+            29 -> MatrixRain(animatedSpeed, unitLabel, accentColor, textColor)
             else -> PureDigital(animatedSpeed, unitLabel, accentColor, textColor)
         }
     }
@@ -1251,5 +1261,529 @@ fun SpeedValueCentered(speed: Float, unit: String, textCol: Color, accent: Color
             color = accent,
             letterSpacing = 2.sp
         )
+    }
+}
+
+@Composable
+fun CyberpunkNeon(speed: Float, unit: String, accent: Color, textCol: Color) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val progress = (speed / 160f).coerceIn(0f, 1f)
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val radius = size.minDimension / 2f - 30.dp.toPx()
+            
+            drawArc(
+                color = textCol.copy(alpha = 0.05f),
+                startAngle = 135f,
+                sweepAngle = 270f,
+                useCenter = false,
+                topLeft = Offset(center.x - radius, center.y - radius),
+                size = Size(radius * 2, radius * 2),
+                style = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round)
+            )
+            val glowColor = if (accent == Color.Red) Color(0xFFFF007F) else accent
+            drawArc(
+                color = glowColor.copy(alpha = 0.25f),
+                startAngle = 135f,
+                sweepAngle = 270f * progress,
+                useCenter = false,
+                topLeft = Offset(center.x - radius, center.y - radius),
+                size = Size(radius * 2, radius * 2),
+                style = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Round)
+            )
+            drawArc(
+                color = glowColor,
+                startAngle = 135f,
+                sweepAngle = 270f * progress,
+                useCenter = false,
+                topLeft = Offset(center.x - radius, center.y - radius),
+                size = Size(radius * 2, radius * 2),
+                style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
+            )
+            
+            for (i in 0..10) {
+                val angle = 135f + (i * 27f)
+                val rad = Math.toRadians(angle.toDouble())
+                val startDist = radius + 8.dp.toPx()
+                val endDist = radius + 15.dp.toPx()
+                val active = (i / 10f) <= progress
+                drawLine(
+                    color = if (active) glowColor else textCol.copy(alpha = 0.2f),
+                    start = Offset(
+                        (center.x + startDist * cos(rad)).toFloat(),
+                        (center.y + startDist * sin(rad)).toFloat()
+                    ),
+                    end = Offset(
+                        (center.x + endDist * cos(rad)).toFloat(),
+                        (center.y + endDist * sin(rad)).toFloat()
+                    ),
+                    strokeWidth = 2.dp.toPx()
+                )
+            }
+        }
+        SpeedValueCentered(speed, unit, textCol, accent)
+    }
+}
+
+@Composable
+fun Chronograph(speed: Float, unit: String, accent: Color, textCol: Color) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val radius = size.minDimension / 2f - 20.dp.toPx()
+            
+            drawCircle(
+                color = textCol.copy(alpha = 0.15f),
+                radius = radius,
+                style = Stroke(width = 3.dp.toPx())
+            )
+            
+            for (i in 0 until 60) {
+                val angle = i * 6f
+                val rad = Math.toRadians(angle.toDouble())
+                val tickLength = if (i % 5 == 0) 10.dp.toPx() else 5.dp.toPx()
+                val tickW = if (i % 5 == 0) 2.dp.toPx() else 1.dp.toPx()
+                val col = if (i % 5 == 0) accent else textCol.copy(alpha = 0.3f)
+                drawLine(
+                    color = col,
+                    start = Offset(
+                        (center.x + (radius - tickLength) * cos(rad)).toFloat(),
+                        (center.y + (radius - tickLength) * sin(rad)).toFloat()
+                    ),
+                    end = Offset(
+                        (center.x + radius * cos(rad)).toFloat(),
+                        (center.y + radius * sin(rad)).toFloat()
+                    ),
+                    strokeWidth = tickW
+                )
+            }
+            
+            val speedAngle = -90f + (speed / 160f).coerceIn(0f, 1f) * 270f
+            val needleRad = Math.toRadians(speedAngle.toDouble())
+            val needleLen = radius - 15.dp.toPx()
+            drawLine(
+                color = accent,
+                start = center,
+                end = Offset(
+                    (center.x + needleLen * cos(needleRad)).toFloat(),
+                    (center.y + needleLen * sin(needleRad)).toFloat()
+                ),
+                strokeWidth = 3.5.dp.toPx(),
+                cap = StrokeCap.Round
+            )
+            drawCircle(color = accent, radius = 6.dp.toPx(), center = center)
+            drawCircle(color = textCol, radius = 2.dp.toPx(), center = center)
+        }
+        
+        Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 60.dp)) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = String.format("%.0f", speed),
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = textCol
+                )
+                Text(
+                    text = unit.uppercase(),
+                    fontSize = 10.sp,
+                    color = accent,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun BarChartHorizontal(speed: Float, unit: String, accent: Color, textCol: Color) {
+    Column(
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(horizontal = 40.dp)
+    ) {
+        Text(
+            text = "VELOCITY",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = accent,
+            letterSpacing = 2.sp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = String.format("%.1f", speed),
+            fontSize = 62.sp,
+            fontWeight = FontWeight.Black,
+            color = textCol
+        )
+        Text(
+            text = unit.uppercase(),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = textCol.copy(alpha = 0.4f),
+            letterSpacing = 1.sp
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        
+        val progress = (speed / 160f).coerceIn(0f, 1f)
+        for (row in 0 until 4) {
+            val limit = (row + 1) / 4f
+            val widthFactor = if (progress >= limit) 1f else if (progress < limit - 0.25f) 0f else (progress - (limit - 0.25f)) / 0.25f
+            Canvas(modifier = Modifier.fillMaxWidth().height(12.dp).padding(vertical = 2.dp)) {
+                drawRoundRect(
+                    color = textCol.copy(alpha = 0.05f),
+                    size = size,
+                    cornerRadius = CornerRadius(4.dp.toPx())
+                )
+                if (widthFactor > 0f) {
+                    drawRoundRect(
+                        color = Brush.horizontalGradient(listOf(accent.copy(alpha = 0.6f), accent)),
+                        size = Size(size.width * widthFactor, size.height),
+                        cornerRadius = CornerRadius(4.dp.toPx())
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DoubleNeedle(speed: Float, unit: String, accent: Color, textCol: Color) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val radius = size.minDimension / 2f - 25.dp.toPx()
+            
+            drawArc(
+                color = textCol.copy(alpha = 0.1f),
+                startAngle = 180f,
+                sweepAngle = 180f,
+                useCenter = false,
+                topLeft = Offset(center.x - radius, center.y - radius),
+                size = Size(radius * 2, radius * 2),
+                style = Stroke(width = 1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 15f)))
+            )
+            
+            val angleLeft = 180f + (speed / 160f).coerceIn(0f, 1f) * 90f
+            val angleRight = 360f - (speed / 160f).coerceIn(0f, 1f) * 90f
+            
+            val radL = Math.toRadians(angleLeft.toDouble())
+            val radR = Math.toRadians(angleRight.toDouble())
+            
+            drawLine(
+                color = accent,
+                start = center,
+                end = Offset(
+                    (center.x + radius * cos(radL)).toFloat(),
+                    (center.y + radius * sin(radL)).toFloat()
+                ),
+                strokeWidth = 3.dp.toPx(),
+                cap = StrokeCap.Round
+            )
+            drawLine(
+                color = textCol.copy(alpha = 0.4f),
+                start = center,
+                end = Offset(
+                    (center.x + radius * cos(radR)).toFloat(),
+                    (center.y + radius * sin(radR)).toFloat()
+                ),
+                strokeWidth = 2.dp.toPx(),
+                cap = StrokeCap.Round
+            )
+            drawCircle(color = accent, radius = 5.dp.toPx(), center = center)
+        }
+        SpeedValueCentered(speed, unit, textCol, accent)
+    }
+}
+
+@Composable
+fun SectorRadar(speed: Float, unit: String, accent: Color, textCol: Color) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        val infiniteTransition = rememberInfiniteTransition(label = "RadarSweep")
+        val radarSweepAngle by infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(3000, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "radarSweepAngle"
+        )
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val radius = size.minDimension / 2f - 30.dp.toPx()
+            val progress = (speed / 160f).coerceIn(0f, 1f)
+            
+            for (r in listOf(0.3f, 0.6f, 1.0f)) {
+                drawCircle(
+                    color = textCol.copy(alpha = 0.08f),
+                    radius = radius * r,
+                    style = Stroke(width = 1.dp.toPx())
+                )
+            }
+            
+            drawLine(color = textCol.copy(alpha = 0.05f), start = Offset(center.x - radius, center.y), end = Offset(center.x + radius, center.y), strokeWidth = 1.dp.toPx())
+            drawLine(color = textCol.copy(alpha = 0.05f), start = Offset(center.x, center.y - radius), end = Offset(center.x, center.y + radius), strokeWidth = 1.dp.toPx())
+            
+            rotate(degrees = radarSweepAngle, pivot = center) {
+                drawArc(
+                    brush = Brush.sweepGradient(listOf(Color.Transparent, accent.copy(alpha = 0.2f), accent.copy(alpha = 0.5f))),
+                    startAngle = 0f,
+                    sweepAngle = 90f,
+                    useCenter = true,
+                    topLeft = Offset(center.x - radius, center.y - radius),
+                    size = Size(radius * 2, radius * 2)
+                )
+            }
+            
+            drawArc(
+                color = accent,
+                startAngle = -90f,
+                sweepAngle = 360f * progress,
+                useCenter = false,
+                topLeft = Offset(center.x - radius - 5.dp.toPx(), center.y - radius - 5.dp.toPx()),
+                size = Size((radius + 5.dp.toPx()) * 2, (radius + 5.dp.toPx()) * 2),
+                style = Stroke(width = 3.dp.toPx())
+            )
+        }
+        SpeedValueCentered(speed, unit, textCol, accent)
+    }
+}
+
+@Composable
+fun RetroLedSegment(speed: Float, unit: String, accent: Color, textCol: Color) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(24.dp)
+    ) {
+        val speedStr = String.format("%03.0f", speed)
+        Row(horizontalArrangement = Arrangement.Center) {
+            speedStr.forEach { char ->
+                Box(modifier = Modifier.padding(horizontal = 4.dp)) {
+                    Text(
+                        text = "8",
+                        fontSize = 80.sp,
+                        fontWeight = FontWeight.Black,
+                        color = textCol.copy(alpha = 0.04f),
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = char.toString(),
+                        fontSize = 80.sp,
+                        fontWeight = FontWeight.Black,
+                        color = accent,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+            }
+        }
+        Text(
+            text = unit.uppercase(),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = textCol.copy(alpha = 0.4f),
+            letterSpacing = 4.sp
+        )
+    }
+}
+
+@Composable
+fun FuturisticRibbon(speed: Float, unit: String, accent: Color, textCol: Color) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val radius = size.minDimension / 2f - 40.dp.toPx()
+            val progress = (speed / 160f).coerceIn(0f, 1f)
+            
+            val trackPath = Path().apply {
+                moveTo(center.x - radius, center.y + radius)
+                cubicTo(
+                    center.x - radius / 2, center.y - radius,
+                    center.x + radius / 2, center.y + radius,
+                    center.x + radius, center.y - radius
+                )
+            }
+            drawPath(
+                path = trackPath,
+                color = textCol.copy(alpha = 0.1f),
+                style = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Round)
+            )
+            
+            drawPath(
+                path = trackPath,
+                color = accent.copy(alpha = 0.5f),
+                style = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Round)
+            )
+            
+            drawPath(
+                path = trackPath,
+                color = accent,
+                style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
+            )
+            
+            val posX = center.x - radius + (radius * 2f * progress)
+            val posY = center.y + radius - (radius * 2f * progress)
+            drawCircle(
+                color = textCol,
+                radius = 7.dp.toPx(),
+                center = Offset(posX, posY)
+            )
+            drawCircle(
+                color = accent,
+                radius = 4.dp.toPx(),
+                center = Offset(posX, posY)
+            )
+        }
+        SpeedValueCentered(speed, unit, textCol, accent)
+    }
+}
+
+@Composable
+fun LiquidCore(speed: Float, unit: String, accent: Color, textCol: Color) {
+    val infiniteTransition = rememberInfiniteTransition(label = "LiquidWobble")
+    val wobbleWave by infiniteTransition.animateFloat(
+        initialValue = -5f,
+        targetValue = 5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "wobbleWave"
+    )
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val maxRadius = size.minDimension / 2f - 40.dp.toPx()
+            val progress = (speed / 160f).coerceIn(0f, 1f)
+            val currentRadius = 30.dp.toPx() + (maxRadius - 30.dp.toPx()) * progress
+            
+            drawCircle(
+                color = textCol.copy(alpha = 0.05f),
+                radius = maxRadius,
+                style = Stroke(width = 2.dp.toPx())
+            )
+            
+            val liquidPath = Path()
+            val steps = 30
+            for (i in 0..steps) {
+                val angle = (i * 360f / steps)
+                val rad = Math.toRadians(angle.toDouble())
+                val waveFactor = 1f + (sin(rad * 4f + wobbleWave).toFloat() * 0.08f * progress)
+                val r = currentRadius * waveFactor
+                val px = center.x + r * cos(rad).toFloat()
+                val py = center.y + r * sin(rad).toFloat()
+                if (i == 0) {
+                    liquidPath.moveTo(px, py)
+                } else {
+                    liquidPath.lineTo(px, py)
+                }
+            }
+            liquidPath.close()
+            
+            drawPath(
+                path = liquidPath,
+                brush = Brush.radialGradient(
+                    colors = listOf(accent, accent.copy(alpha = 0.4f), Color.Transparent),
+                    center = center,
+                    radius = currentRadius + 10.dp.toPx()
+                )
+            )
+            
+            drawPath(
+                path = liquidPath,
+                color = accent,
+                style = Stroke(width = 2.5.dp.toPx())
+            )
+        }
+        SpeedValueCentered(speed, unit, textCol, accent)
+    }
+}
+
+@Composable
+fun TypographyFocus(speed: Float, unit: String, accent: Color, textCol: Color) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(24.dp)
+    ) {
+        val label = when {
+            speed < 0.5f -> "IDLE"
+            speed < 30f -> "CRUISING"
+            speed < 80f -> "HASTE"
+            speed < 120f -> "VELOCITY"
+            else -> "SUPERSONIC"
+        }
+        Text(
+            text = label,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Black,
+            color = accent,
+            letterSpacing = 4.sp
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = String.format("%.1f", speed),
+            fontSize = 76.sp,
+            fontWeight = FontWeight.Normal,
+            color = textCol,
+            letterSpacing = (-2).sp
+        )
+        Text(
+            text = unit.uppercase(),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = textCol.copy(alpha = 0.4f),
+            letterSpacing = 1.sp
+        )
+    }
+}
+
+@Composable
+fun MatrixRain(speed: Float, unit: String, accent: Color, textCol: Color) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(280.dp)) {
+        val infiniteTransition = rememberInfiniteTransition(label = "MatrixFlow")
+        val shiftFactor by infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(1500, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "shiftFactor"
+        )
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val center = Offset(size.width / 2f, size.height / 2f)
+            val radius = size.minDimension / 2f - 20.dp.toPx()
+            val progress = (speed / 160f).coerceIn(0f, 1f)
+            
+            drawCircle(
+                color = textCol.copy(alpha = 0.05f),
+                radius = radius,
+                style = Stroke(width = 1.dp.toPx())
+            )
+            
+            val cols = 12
+            for (col in 0 until cols) {
+                val posX = center.x - radius + (col * (2f * radius / cols))
+                val relativeColOffset = (col * 137f) % 1f
+                val flowY = center.y - radius + (((shiftFactor + relativeColOffset) % 1f) * 2f * radius)
+                
+                val isActiveCol = col / cols.toFloat() <= progress
+                val colCol = if (isActiveCol) accent.copy(alpha = 0.4f) else textCol.copy(alpha = 0.08f)
+                
+                drawCircle(
+                    color = colCol,
+                    radius = (2.dp.toPx() + 3.dp.toPx() * progress),
+                    center = Offset(posX, flowY)
+                )
+                drawLine(
+                    color = colCol.copy(alpha = 0.15f),
+                    start = Offset(posX, center.y - radius),
+                    end = Offset(posX, center.y + radius),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
+        }
+        SpeedValueCentered(speed, unit, textCol, accent)
     }
 }
