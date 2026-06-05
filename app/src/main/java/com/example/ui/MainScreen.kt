@@ -525,7 +525,6 @@ fun MainScreen(
                         // RIGHT VIEWPORT: Command Cockpit Controls
                         Column(
                             modifier = Modifier
-                                .weight(0.7f)
                                 .fillMaxHeight()
                                 .padding(vertical = 12.dp, horizontal = 12.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
