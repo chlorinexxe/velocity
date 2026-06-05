@@ -1,21 +1,85 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Velocity
 
-# Run and deploy your AI Studio app
+> A high-fidelity minimalist real-time speed and atmospheric visualizer engine designed for sensory fluidity.
 
-This contains everything you need to run your app locally.
+[![Platform](https://img.shields.io/badge/platform-Android-3DDC84?logo=android&logoColor=white)](https://developer.android.com)
+[![Language](https://img.shields.io/badge/language-Kotlin-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
+[![Build](https://img.shields.io/badge/build-Gradle-02303A?logo=gradle&logoColor=white)](https://gradle.org)
+[![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)](https://github.com/chlorinexxe/velocity/actions)
 
-View your app in AI Studio: https://ai.studio/apps/4e002243-bf92-4bee-a256-96f603a546fa
+---
 
-## Run Locally
+## About
 
-**Prerequisites:**  [Android Studio](https://developer.android.com/studio)
+**Velocity** is an Android application that delivers real-time speed and altitude visualization with a focus on sensory fluidity and minimalist aesthetics. It uses a server-side AI API to power its core engine and is fully written in Kotlin.
 
+---
 
-1. Open Android Studio
-2. Select **Open** and choose the directory containing this project
-3. Allow Android Studio to fix any incompatibilities as it imports the project.
-4. Create a file named `.env` in the project directory and set `GEMINI_API_KEY` in that file to your Gemini API key (see `.env.example` for an example)
-5. Remove this line from the app's `build.gradle.kts` file: `signingConfig = signingConfigs.getByName("debugConfig")`
-6. Run the app on an emulator or physical device
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Language | Kotlin (100%) |
+| Platform | Android |
+| Build System | Gradle (Kotlin DSL) |
+| CI/CD | GitHub Actions |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- [Android Studio](https://developer.android.com/studio) (latest stable)
+- A valid `GEMINI_API_KEY` (set in your `.env` file)
+
+### Run Locally
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/chlorinexxe/velocity.git
+   cd velocity
+   ```
+
+2. **Open in Android Studio**
+   Select **File → Open** and choose the project directory. Allow Android Studio to resolve any import incompatibilities automatically.
+
+3. **Configure your API key**
+   Create a `.env` file in the project root:
+   ```env
+   GEMINI_API_KEY=your_api_key_here
+   ```
+   Refer to `.env.example` for the expected format.
+
+4. **Fix signing config**
+   In `app/build.gradle.kts`, remove the following line before running:
+   ```kotlin
+   signingConfig = signingConfigs.getByName("debugConfig")
+   ```
+
+5. **Run the app**
+   Launch on an emulator or a connected physical device via the **Run** button in Android Studio.
+
+---
+
+## Project Structure
+
+```
+velocity/
+├── app/                    # Main Android application module
+├── assets/                 # Project assets
+├── gradle/                 # Gradle wrapper files
+├── .env.example            # Environment variable template
+├── build.gradle.kts        # Root build configuration
+├── settings.gradle.kts     # Project settings
+└── metadata.json           # App metadata
+```
+
+---
+
+## Releases
+
+| Version | Notes |
+|---------|-------|
+| [1.04](https://github.com/chlorinexxe/velocity/releases/tag/1.04) | Landscape fixes (latest) |
+| 1.03 | Initial release |
